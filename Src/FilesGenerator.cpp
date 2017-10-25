@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
+#include <defs.h>
 #define null 0
 
 struct processData {
@@ -14,7 +15,7 @@ struct processData {
 int main(int argc, char* argv[]) 
 {
     FILE * pFile;
-    pFile = fopen ("processes.txt","w");
+    pFile = fopen (PROCESS_FILE_NAME,"w");
     int no;
     struct processData pData;
    
