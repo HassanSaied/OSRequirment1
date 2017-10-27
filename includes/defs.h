@@ -7,6 +7,9 @@
 
 
 #define PROCESS_FILE_NAME "processes.txt"
+//This Name must be put in the make file also
+#define CLOCK_PROCESS_IMAGE_NAME "clock"
+#define SCHEDULER_PROCESS_IMAGE_NAME "scheduler"
 #define bool int
 #define true 1
 #define false 0

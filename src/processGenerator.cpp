@@ -5,7 +5,9 @@
 #include <process_queue.h>
 void ClearResources(int);
 //TODO : pass our own data structure instead of this array
-void readProcessFromFile(process_queue *queue);
+void read_process_from_file(process_queue *queue);
+int create_clock(void);
+int create_scheduler(char *const *argv);
 void testReadProcess(process_queue *queue)
 {
     while(!empty(queue)) {
@@ -15,14 +17,19 @@ void testReadProcess(process_queue *queue)
     }
 }
 int main() {
+
     process_queue * queue = init();
-    readProcessFromFile(queue);
+    read_process_from_file(queue);
     //This is a test function, used purely for testing, remove it in the final product
     testReadProcess(queue);
     initQueue(true);
     //TODO: 
     // 1-Ask the user about the chosen scheduling Algorithm and its parameters if exists.
+    //This will be done after we know parameters of each algorithm
     // 2-Initiate and create Scheduler and Clock processes.
+    create_clock();
+    char* const argv[] = {SCHEDULER_PROCESS_IMAGE_NAME , "Hi,I am Hassan" , NULL};
+    create_scheduler(argv);
 
 
     // 3-use this function AFTER creating clock process to initialize clock, and initialize MsgQueue
@@ -58,7 +65,7 @@ void ClearResources(int)
     destroyClk(true); 
     exit(0);
 }
-void readProcessFromFile(process_queue *queue)
+void read_process_from_file(process_queue *queue)
 {
     FILE * processFile = fopen(PROCESS_FILE_NAME ,"r");
     char lineIdentifier[10],ignoredEndLine;
@@ -84,7 +91,38 @@ void readProcessFromFile(process_queue *queue)
     fclose(processFile);
     return;
 }
+int create_clock(void)
+{
+    int clock_pid;
+    if((clock_pid = fork())==0)
+    {
+        //This is the child
+        if(execl(CLOCK_PROCESS_IMAGE_NAME , CLOCK_PROCESS_IMAGE_NAME , (char*) NULL) == -1)
+        {
+            puts("Error In Creating clock Instance , Terminating this child");
+            exit(1);
+        }
+    } else
+    {
+        return clock_pid;
+    }
+}
+int create_scheduler(char *const *argv)
+{
+    int scheduler_pid;
+    if((scheduler_pid = fork())==0)
+    {
+        //This is the child
+        if(execv(SCHEDULER_PROCESS_IMAGE_NAME ,argv) == -1)
+        {
+            puts("Error In Creating scheduler Instance , Terminating this child");
+            exit(1);
+        }
+    } else
+    {
+        return scheduler_pid;
+    }
 
-
+}
 
 
