@@ -7,5 +7,7 @@
 
 
 #define PROCESS_FILE_NAME "processes.txt"
-
+#define bool int
+#define true 1
+#define false 0
 #endif //OSREQUIRMENT_DEFS_H

@@ -1,25 +1,24 @@
 #include <clkUtilities.h>
 #include <queueUtilities.h>
 #include <defs.h>
-#include <ProcessStruct.h>
-#include <cstring>
+#include <process_struct.h>
+#include <process_queue.h>
 void ClearResources(int);
 //TODO : pass our own data structure instead of this array
-void readProcessFromFile(int &processCount, process ** &processList);
-void testReadProcess(process ** processList , const int & processCount)
+void readProcessFromFile(process_queue *queue);
+void testReadProcess(process_queue *queue)
 {
-    for (int i = 0; i < processCount; ++i) {
-        printf("%d , %d , %d , %d\n" , processList[i]->ID , processList[i]->arrivalTime,
-               processList[i]->runningTime , processList[i]->priority);
+    while(!empty(queue)) {
+        process * currentProcess = dequeue(queue);
+        printf("%d , %d , %d , %d\n" , currentProcess->ID , currentProcess->arrivalTime,
+               currentProcess->runningTime , currentProcess->priority);
     }
 }
 int main() {
-
-    int processCount;
-    process** processList;
-    readProcessFromFile(processCount , processList);
+    process_queue * queue = init();
+    readProcessFromFile(queue);
     //This is a test function, used purely for testing, remove it in the final product
-    testReadProcess(processList , processCount);
+    testReadProcess(queue);
     initQueue(true);
     //TODO: 
     // 1-Ask the user about the chosen scheduling Algorithm and its parameters if exists.
@@ -59,26 +58,22 @@ void ClearResources(int)
     destroyClk(true); 
     exit(0);
 }
-void readProcessFromFile(int &processCount, process ** &processList)
+void readProcessFromFile(process_queue *queue)
 {
-    processList = (process **) malloc(10*sizeof(process*));
-    if(processList == NULL)
-        return;
-    processCount = 0;
     FILE * processFile = fopen(PROCESS_FILE_NAME ,"r");
-    char LineIdentifier[10],ignoredEndLine;
-    while(fscanf(processFile , "%s" ,LineIdentifier)!= EOF)
+    char lineIdentifier[10],ignoredEndLine;
+    while(fscanf(processFile , "%s" ,lineIdentifier)!= EOF)
     {
-        if(LineIdentifier[0] != '#')
+        if(lineIdentifier[0] != '#')
         {
             //allocate a memory for new process
-            process * newProcess = (process *) malloc(sizeof(process));
-            if(newProcess == NULL) //TODO: really must change this behaviour, 7mdy may kill me for this
+            process * new_process = (process *) malloc(sizeof(process));
+            if(new_process == NULL) //TODO: really must change this behaviour, 7mdy may kill me for this
                 continue;
-            newProcess->ID = atoi(LineIdentifier);
-            fscanf(processFile , "%d%d%d%c" ,&newProcess->arrivalTime,&newProcess->runningTime
-                    ,&newProcess->priority,&ignoredEndLine);
-            processList[processCount++] = newProcess;
+            new_process->ID = atoi(lineIdentifier);
+            fscanf(processFile , "%d%d%d%c" ,&new_process->arrivalTime,&new_process->runningTime
+                    ,&new_process->priority,&ignoredEndLine);
+            enqueue(queue , new_process);
         }
         else
         {
