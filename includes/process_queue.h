@@ -11,6 +11,7 @@ struct process_queue
 {
     generic_queue_head * head;
 };
+typedef struct process_queue process_queue;
 process_queue* init();
 
 bool enqueue(process_queue *queue, process *new_node);

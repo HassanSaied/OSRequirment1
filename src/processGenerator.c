@@ -59,7 +59,7 @@ int main() {
     
 }
 
-void ClearResources(int)
+void ClearResources(int x)
 {
     msgctl(qid, IPC_RMID, (struct msqid_ds*)0);
     destroyClk(true); 

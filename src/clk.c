@@ -1,5 +1,5 @@
 #include "clkUtilities.h"
-
+#include <defs.h>
 /* This file is done for you,
 Probably you will not need to change anything
 This file represents an emulated clock for the simulation purpose only

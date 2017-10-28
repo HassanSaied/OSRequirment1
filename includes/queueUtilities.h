@@ -22,6 +22,7 @@ struct processData {
    //TODO: add the process data details
    int id;
 };
+typedef struct processData processData;
 
 struct messagebuffer
 {
@@ -62,11 +63,11 @@ int Sendmsg(struct processData pData) {
   return msgsnd(qid, &msg, sizeof(msg)-sizeof(long), !IPC_NOWAIT);
 }
 
-int Recmsg( processData &pData) {
+int Recmsg(processData *pData) {
   struct messagebuffer msg;
   msg.mtype = 1L;
   int ret=msgrcv(qid,&msg,sizeof(msg)-sizeof(long),0,IPC_NOWAIT);
-  pData=msg.data;
+  pData->id=msg.data.id;
   if (ret == -1)
     return -1;
   if(msg.mtype == ENDTYPE)
@@ -81,7 +82,7 @@ void lastSend() {
   msgsnd(qid, &msg, sizeof(msg)-sizeof(long), !IPC_NOWAIT);
 }
 
-void destroyQueueAndExit(int)
+void destroyQueueAndExit(int x)
 {
     msgctl(qid, IPC_RMID, (struct msqid_ds*)0); 
     exit(0);
