@@ -47,7 +47,6 @@ void initQueue(bool flag)
 }
 
 
-
 int Sendmsg(process pData)
 {
     struct messagebuffer msg;

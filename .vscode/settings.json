@@ -5,6 +5,7 @@
         "clk_utilities.h": "c",
         "process_data.h": "c",
         "queue_utilities.h": "c",
-        "types.h": "c"
+        "types.h": "c",
+        "climits": "c"
     }
 }

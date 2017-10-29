@@ -1,37 +1,43 @@
 #include <clk_utilities.h>
 #include <queue_utilities.h>
 #include <defs.h>
+#include <algorithms.h>
 #include <process_struct.h>
 #include <process_queue.h>
 
+#include <stdio.h>
+#include <stdlib.h>
+
 void clear_resources(int);
-//TODO : pass our own data structure instead of this array
 void read_process_from_file(process_queue * queue);
 int create_clock(void);
 int create_scheduler(char * const * argv);
-
-void testReadProcess(process_queue * queue)
-{
-    while (!empty(queue))
-    {
-        process * currentProcess = dequeue(queue);
-        printf("%d , %d , %d , %d\n" , currentProcess->ID , currentProcess->arrivalTime,
-               currentProcess->runningTime , currentProcess->priority);
-    }
-}
 
 int main()
 {
     process_queue * queue = init();
     read_process_from_file(queue);
-    //This is a test function, used purely for testing, remove it in the final product
     initQueue(true);
-    //TODO:
-    // 1-Ask the user about the chosen scheduling Algorithm and its parameters if exists.
-    //This will be done after we know parameters of each algorithm
-    // 2-Initiate and create Scheduler and Clock processes.
+
+    printf("Please choose one of the following algorithms to use for scheduling:\n");
+    printf("%d-%s\n%d-%s\n%d-%s\n", HPF, ALGORITHM_TYPE_STRINGS[HPF], 
+    SRTN, ALGORITHM_TYPE_STRINGS[SRTN], RR, ALGORITHM_TYPE_STRINGS[RR]);
+    int algorithm_choice, quantum;
+    while((algorithm_choice = getchar()-'0')!= HPF && algorithm_choice!= SRTN 
+            && algorithm_choice!= RR){
+        printf("Please enter a vaild choice!\n");
+        getchar(); // Get rid of enter
+    }
+    if(algorithm_choice == RR){
+        printf("Please enter a value to be used as quantum: ");
+        while(scanf("%d", &quantum) != 1 && quantum <= 0){
+            printf("Please enter a vaild value!\n");  
+        }
+    }
     create_clock();
-    char * const argv[] = {SCHEDULER_PROCESS_IMAGE_NAME , "RR" , NULL};
+    char quantum_string[64];
+    sprintf(quantum_string, "%d", quantum);
+    char * const argv[] = {SCHEDULER_PROCESS_IMAGE_NAME , ALGORITHM_TYPE_STRINGS[algorithm_choice], quantum_string , NULL};
     create_scheduler(argv);
     //will be removed
     sleep(2);
