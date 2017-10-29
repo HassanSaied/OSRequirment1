@@ -31,7 +31,7 @@ int main()
     //This will be done after we know parameters of each algorithm
     // 2-Initiate and create Scheduler and Clock processes.
     create_clock();
-    char * const argv[] = {SCHEDULER_PROCESS_IMAGE_NAME , "HPS" , NULL};
+    char * const argv[] = {SCHEDULER_PROCESS_IMAGE_NAME , "RR" , NULL};
     create_scheduler(argv);
     //will be removed
     sleep(2);
