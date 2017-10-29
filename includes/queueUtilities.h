@@ -9,7 +9,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <signal.h>
-
+#include <process_struct.h>
 #define QUEUEKEY 777
 #define ENDTYPE 19L
 
@@ -18,17 +18,11 @@
 int qid;
 //===============================
 
-struct processData {
-   //TODO: add the process data details
-   int id;
-};
-typedef struct processData processData;
-
 struct messagebuffer
 {
  long mtype;
- struct processData data;
- 
+ //struct processData data;
+ process data;
 };
 
 
@@ -51,29 +45,29 @@ void initQueue(bool flag) {
           kill(getpgrp(),SIGINT);
       }
   }
-  
+
 }
 
 
 
-int Sendmsg(struct processData pData) {
+int Sendmsg(process pData) {
   struct messagebuffer msg;
   msg.data = pData;
   msg.mtype = 1L;
   return msgsnd(qid, &msg, sizeof(msg)-sizeof(long), !IPC_NOWAIT);
 }
 
-int Recmsg(processData *pData) {
+int Recmsg(process *pData) {
   struct messagebuffer msg;
   msg.mtype = 1L;
   int ret=msgrcv(qid,&msg,sizeof(msg)-sizeof(long),0,IPC_NOWAIT);
-  pData->id=msg.data.id;
+  *pData=msg.data;
   if (ret == -1)
     return -1;
   if(msg.mtype == ENDTYPE)
       return  1;
   return 0;
-  
+
 }
 
 void lastSend() {
@@ -84,8 +78,6 @@ void lastSend() {
 
 void destroyQueueAndExit(int x)
 {
-    msgctl(qid, IPC_RMID, (struct msqid_ds*)0); 
+    msgctl(qid, IPC_RMID, (struct msqid_ds*)0);
     exit(0);
 }
-
-

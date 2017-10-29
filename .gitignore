@@ -49,3 +49,5 @@ crashlytics-build.properties
 fabric.properties
 
 processes.txt
+build/
+obj/

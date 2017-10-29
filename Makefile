@@ -51,17 +51,18 @@ process_generator: $(PROCCESS_GENERATOR_SOURCE)
 directories:
 	mkdir $(ODIR)
 	mkdir $(BUILDDIR)
-	
-build:directories clock files_generator process_generator process scheduler
 
+build: directories clock files_generator process_generator process scheduler
+run : all
+		-cd build;echo 10 | ./files_generator;./process_generator
 .PHONY: clean
 
 clean:
 	rm -r -f $(ODIR) $(BUILDDIR)
 
 clean_OS:
-	ipcrm -M 300
-	ipcrm -Q 777
+	-ipcrm -M 300
+	-ipcrm -Q 777
 	@echo "All OS Items Cleared"
 
-all:clean build
+all:clean clean_OS build

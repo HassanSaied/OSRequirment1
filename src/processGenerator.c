@@ -21,24 +21,26 @@ int main() {
     process_queue * queue = init();
     read_process_from_file(queue);
     //This is a test function, used purely for testing, remove it in the final product
-    testReadProcess(queue);
     initQueue(true);
-    //TODO: 
+    //TODO:
     // 1-Ask the user about the chosen scheduling Algorithm and its parameters if exists.
     //This will be done after we know parameters of each algorithm
     // 2-Initiate and create Scheduler and Clock processes.
     create_clock();
-    char* const argv[] = {SCHEDULER_PROCESS_IMAGE_NAME , "Hi,I am Hassan" , NULL};
+    char* const argv[] = {SCHEDULER_PROCESS_IMAGE_NAME , "HPS" , NULL};
     create_scheduler(argv);
+    //will be removed
+    sleep(2);
+
 
 
     // 3-use this function AFTER creating clock process to initialize clock, and initialize MsgQueue
     initClk();
 
-    
+
     //TODO:  Generation Main Loop
-    //4-Creating a data structure for process  and  provide it with its parameters 
-    //5-Send & Notify the information to  the scheduler at the appropriate time 
+    //4-Creating a data structure for process  and  provide it with its parameters
+    //5-Send & Notify the information to  the scheduler at the appropriate time
     //(only when a process arrives) so that it will be put it in its turn.
 
     //===================================
@@ -46,23 +48,22 @@ int main() {
 
     /////Toget time use the following function
     int x= getClk();
-    printf("current time is %d\n",x);
+    printf("current_generator time is %d\n",x);
     //////Tosend something to the scheduler, for example send id 2
-    struct processData pD;
-    pD.id = 2;
+    process pD = *dequeue(queue);
     Sendmsg(pD); //returns -1 on failure;
     //no more processes, send end of transmission message
     lastSend();
     //////////To clear all resources
     ClearResources(0);
     //======================================
-    
+
 }
 
 void ClearResources(int x)
 {
     msgctl(qid, IPC_RMID, (struct msqid_ds*)0);
-    destroyClk(true); 
+    destroyClk(true);
     exit(0);
 }
 void read_process_from_file(process_queue *queue)
@@ -124,5 +125,3 @@ int create_scheduler(char *const *argv)
     }
 
 }
-
-
