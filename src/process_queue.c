@@ -1,23 +1,22 @@
-//
-// Created by hassan on 10/27/17.
-//
 #include <process_queue.h>
-process_queue* init()
+
+process_queue * init()
 {
     process_queue * queue = (process_queue *)malloc(sizeof(process_queue));
     queue->head = init_generic_queue();
 }
 
-bool enqueue(process_queue *queue, process *new_node)
+bool enqueue(process_queue * queue, process * new_node)
 {
-    return generic_queue_enqueue(queue->head ,(void*)new_node);
+    return generic_queue_enqueue(queue->head , (void *)new_node);
 }
+
 process * dequeue(process_queue * queue)
 {
-    return (process*)generic_queue_dequeue(queue->head);
+    return (process *)generic_queue_dequeue(queue->head);
 }
+
 bool empty(process_queue * queue)
 {
     return generic_queue_empty(queue->head);
-
 }

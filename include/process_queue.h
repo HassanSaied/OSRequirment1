@@ -1,7 +1,3 @@
-//
-// Created by hassan on 10/27/17.
-//
-
 #ifndef OSREQUIRMENT_PROCESS_QUEUE_H
 #define OSREQUIRMENT_PROCESS_QUEUE_H
 
@@ -12,9 +8,9 @@ struct process_queue
     generic_queue_head * head;
 };
 typedef struct process_queue process_queue;
-process_queue* init();
+process_queue * init();
 
-bool enqueue(process_queue *queue, process *new_node);
+bool enqueue(process_queue * queue, process * new_node);
 process * dequeue(process_queue * queue);
 bool empty(process_queue * queue);
 
