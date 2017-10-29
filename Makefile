@@ -1,4 +1,4 @@
-IDIR =includes
+IDIR =include
 CC=gcc
 CFLAGS=-I $(IDIR)
 
@@ -11,19 +11,19 @@ BUILDDIR=build
 
 LIBS=
 
-_DEPS =clkUtilities.h generic_queue.h process_queue.h queueUtilities.h defs.h headers.h process_struct.h
+_DEPS =clk_utilities.h generic_queue.h process_queue.h queue_utilities.h defs.h headers.h process_struct.h highest_priority_first.h shortest_remaining_time_first.h round_robin.h
 
 DEPS = $(patsubst %,$(IDIR)/%,$(_DEPS))
 
-_OBJ =clk.o generic_queue.o processGenerator.o scheduler.o FilesGenerator.o process.o process_queue.o
+_OBJ =clk.o generic_queue.o process_generator.o scheduler.o files_generator.o process.o process_queue.o highest_priority_first.o shortest_remaining_time_first.o round_robin.o
 
 OBJ = $(patsubst %,$(ODIR)/%,$(_OBJ))
 
-_CLK_SOURCE = clk.o
-_FILES_GENERATOR_SOURCE=FilesGenerator.o
+_CLK_SOURCE=clk.o
+_FILES_GENERATOR_SOURCE=files_generator.o
 _PROCESS_SOURCE=process.o
-_SCHEDULER_SOURCE=scheduler.o
-_PROCESS_GENERATOR_SOURCE=processGenerator.o generic_queue.o process_queue.o
+_SCHEDULER_SOURCE=scheduler.o highest_priority_first.o shortest_remaining_time_first.o round_robin.o
+_PROCESS_GENERATOR_SOURCE=process_generator.o generic_queue.o process_queue.o
 
 CLK_SOURCE= $(patsubst %,$(ODIR)/%,$(_CLK_SOURCE))
 
