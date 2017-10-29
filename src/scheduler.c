@@ -1,31 +1,11 @@
 #include <clk_utilities.h>
 #include <queue_utilities.h>
-#include <process_struct.h>
 #include <highest_priority_first.h>
 #include <shortest_remaining_time_first.h>
 #include <round_robin.h>
+#include <scheduler.h>
 
 #include <string.h>
-
-struct process_data
-{
-    process inner_process;
-    enum {WAITING , RUNNING } state;
-    int start_time;
-    int remaining_time;
-
-};
-typedef struct process_data process_data;
-
-process_data init_process_data(process * inner_process)
-{
-    process_data data;
-    data.inner_process = *inner_process;
-    data.state = WAITING;
-    data.start_time = -1;
-    data.remaining_time = inner_process->runningTime;
-    return data;
-}
 
 int main(int argc, char * argv[])
 {
