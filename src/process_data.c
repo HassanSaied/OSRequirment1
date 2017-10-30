@@ -6,5 +6,6 @@ process_data * init_process_data(process *inner_process)
     data->state = WAITING;
     data->start_time = -1;
     data->remaining_time = inner_process->runningTime;
+    data->finish_time = -1;
     return data;
 }

@@ -1,10 +1,9 @@
 #include <clk_utilities.h>
-#include <queue_utilities.h>
 #include <highest_priority_first.h>
 #include <shortest_remaining_time_first.h>
 #include <round_robin.h>
 #include <process_data.h>
-
+#include <queue_utilities.h>
 #include <string.h>
 
 int main(int argc, char * argv[])

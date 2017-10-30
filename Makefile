@@ -21,9 +21,9 @@ OBJ = $(patsubst %,$(ODIR)/%,$(_OBJ))
 
 _CLK_SOURCE=clk.o
 _FILES_GENERATOR_SOURCE=files_generator.o
-_PROCESS_SOURCE=process.o
-_SCHEDULER_SOURCE=scheduler.o process_data.o generic_queue.o process_queue.o highest_priority_first.o shortest_remaining_time_first.o round_robin.o process_data.o red_black_tree.o stack.o misc.o hpf_red_black_tree.o srtn_rec_black_tree.o
-_PROCESS_GENERATOR_SOURCE=process_generator.o process_data.o generic_queue.o process_queue.o cpu_util.o red_black_tree.o stack.o misc.o hpf_red_black_tree.o srtn_rec_black_tree.o
+_PROCESS_SOURCE=process.o clk_utilities.o
+_SCHEDULER_SOURCE=scheduler.o process_data.o generic_queue.o process_queue.o highest_priority_first.o shortest_remaining_time_first.o round_robin.o process_data.o red_black_tree.o stack.o misc.o hpf_red_black_tree.o srtn_rec_black_tree.o clk_utilities.o queue_utilities.o
+_PROCESS_GENERATOR_SOURCE=process_generator.o process_data.o generic_queue.o process_queue.o cpu_util.o red_black_tree.o stack.o misc.o hpf_red_black_tree.o srtn_rec_black_tree.o clk_utilities.o queue_utilities.o
 
 CLK_SOURCE= $(patsubst %,$(ODIR)/%,$(_CLK_SOURCE))
 

@@ -4,6 +4,7 @@
 
 #include <hpf_red_black_tree.h>
 
+
 rb_red_blk_tree * hpf_init_tree(void)
 {
     return RBTreeCreate(compare , NullFunction , NullFunction,print , NullFunction);
@@ -27,6 +28,10 @@ rb_red_blk_node * hpf_get_next_process(rb_red_blk_tree *tree)
     while(current_node->right != tree->nil)
         current_node = current_node->right;
     return current_node;
+}
+bool hpf_tree_empty(rb_red_blk_tree * tree)
+{
+    return tree->root->left == tree->nil;
 }
 void hpf_tree_destroy(rb_red_blk_tree *tree)
 {

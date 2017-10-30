@@ -6,9 +6,10 @@
 struct process_data
 {
     process inner_process;
-    enum {WAITING , RUNNING } state;
+    enum {WAITING , RUNNING,FINISHED} state;
     int start_time;
     int remaining_time;
+    int finish_time;
 
 };
 typedef struct process_data process_data;
