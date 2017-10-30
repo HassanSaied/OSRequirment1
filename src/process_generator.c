@@ -3,7 +3,7 @@
 #include <defs.h>
 #include <process_struct.h>
 #include <process_queue.h>
-
+#include <process_red_black_tree.h>
 void clear_resources(int);
 //TODO : pass our own data structure instead of this array
 void read_process_from_file(process_queue * queue);
@@ -19,11 +19,26 @@ void testReadProcess(process_queue * queue)
                currentProcess->runningTime , currentProcess->priority);
     }
 }
-
+void test_r_b_tree(process_queue * queue ,rb_red_blk_tree * tree)
+{
+    //This function does an absolutely wrong cast, but it freakin' works, please use it for test only
+    while(!empty(queue))
+    {
+        process * current_process = dequeue(queue);
+        process_tree_insert(tree , current_process);
+    }
+    while(tree->root->left != tree->nil)
+    {
+        printf("%d\n",((process_data*)(max_priority_process(tree)->info))->inner_process.priority);
+        process_tree_delete(tree , max_priority_process(tree));
+    }
+    read_process_from_file(queue);
+}
 int main()
 {
     process_queue * queue = init();
     read_process_from_file(queue);
+    test_r_b_tree(queue , init_process_tree());
     //This is a test function, used purely for testing, remove it in the final product
     initQueue(true);
     //TODO:
