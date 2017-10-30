@@ -1,11 +1,14 @@
 #include <clk_utilities.h>
 #include <queue_utilities.h>
 #include <defs.h>
+#include <algorithms.h>
 #include <process_struct.h>
 #include <process_queue.h>
 #include <process_red_black_tree.h>
+#include <stdio.h>
+#include <stdlib.h>
+
 void clear_resources(int);
-//TODO : pass our own data structure instead of this array
 void read_process_from_file(process_queue * queue);
 int create_clock(void);
 int create_scheduler(char * const * argv);
@@ -41,14 +44,29 @@ int main()
     test_r_b_tree(queue , init_process_tree());
     //This is a test function, used purely for testing, remove it in the final product
     initQueue(true);
-    //TODO:
-    // 1-Ask the user about the chosen scheduling Algorithm and its parameters if exists.
-    //This will be done after we know parameters of each algorithm
-    // 2-Initiate and create Scheduler and Clock processes.
+
+    printf("Please choose one of the following algorithms to use for scheduling:\n");
+    printf("%d-%s\n%d-%s\n%d-%s\n", HPF, ALGORITHM_TYPE_STRINGS[HPF], 
+    SRTN, ALGORITHM_TYPE_STRINGS[SRTN], RR, ALGORITHM_TYPE_STRINGS[RR]);
+    int algorithm_choice, quantum;
+    while((algorithm_choice = getchar()-'0')!= HPF && algorithm_choice!= SRTN 
+            && algorithm_choice!= RR){
+        printf("Please enter a vaild choice!\n");
+        getchar(); // Get rid of enter
+    }
+    if(algorithm_choice == RR){
+        printf("Please enter a value to be used as quantum: ");
+        while(scanf("%d", &quantum) != 1 && quantum <= 0){
+            printf("Please enter a vaild value!\n");  
+        }
+    }
     create_clock();
-    char * const argv[] = {SCHEDULER_PROCESS_IMAGE_NAME , "RR" , NULL};
-    create_scheduler(argv);
+    char quantum_string[64];
+    sprintf(quantum_string, "%d", quantum);
+    char * const argv[] = {SCHEDULER_PROCESS_IMAGE_NAME , ALGORITHM_TYPE_STRINGS[algorithm_choice], quantum_string , NULL};
+    int scheduler_pid = create_scheduler(argv);
     //will be removed
+   
     sleep(2);
     // 3-use this function AFTER creating clock process to initialize clock, and initialize MsgQueue
     initClk();
@@ -59,27 +77,33 @@ int main()
     //===================================
     //Preimplemented Functions examples
     /////Toget time use the following function
-    int x = getClk();
-    printf("Process Generator: current time is %d\n", x);
-    //////Tosend something to the scheduler, for example send id 2
-    process pD = *dequeue(queue);
-    Sendmsg(pD); //returns -1 on failure;
+    int current_second;
+    process* pD = NULL;
+    while(!empty(queue)){
+        current_second = getClk();
+        if(pD == NULL)
+            pD = dequeue(queue);
+        if(pD->arrivalTime == current_second){
+            Sendmsg(*pD); //returns -1 on failure;
+            pD = NULL;
+        }
+    }
     //no more processes, send end of transmission message
     lastSend();
     //////////To clear all resources
+    int child_status;
+    waitpid(scheduler_pid, &child_status, 0);
     clear_resources(0);
     //======================================
 }
 
-void clear_resources(int x)
-{
+void clear_resources(int x){
     msgctl(qid, IPC_RMID, (struct msqid_ds *)0);
     destroyClk(true);
     exit(0);
 }
 
-void read_process_from_file(process_queue * queue)
-{
+void read_process_from_file(process_queue * queue){
     FILE * processFile = fopen(PROCESS_FILE_NAME , "r");
     char lineIdentifier[10], ignoredEndLine;
     while (fscanf(processFile , "%s" , lineIdentifier) != EOF)
@@ -107,8 +131,7 @@ void read_process_from_file(process_queue * queue)
     return;
 }
 
-int create_clock(void)
-{
+int create_clock(void){
     int clock_pid;
     if ((clock_pid = fork()) == 0)
     {
@@ -125,8 +148,7 @@ int create_clock(void)
     }
 }
 
-int create_scheduler(char * const * argv)
-{
+int create_scheduler(char * const * argv){
     int scheduler_pid;
     if ((scheduler_pid = fork()) == 0)
     {

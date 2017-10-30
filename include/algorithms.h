@@ -1,0 +1,12 @@
+#ifndef OSREQUIRMENT_ALGORITHMS_H
+#define OSREQUIRMENT_ALGORITHMS_H
+
+enum ALGORITHM_TYPE{
+    HPF,
+    SRTN,
+    RR
+};
+
+const char * const ALGORITHM_TYPE_STRINGS[] = {"HPF", "SRTN", "RR"};
+
+#endif // OSREQUIRMENT_ALGORITHMS_H
