@@ -4,6 +4,8 @@
 #include <stdio.h>
 #include  <sys/types.h>
 #include <unistd.h>
+#include <sys/wait.h>
+#include <string.h>
 
 #define min(a,b) a<b ? a:b
 
@@ -40,30 +42,58 @@ process_data *dequeue_circular(process_data_queue *queue){
     return data;
 }
 
-static void sig_handler(int sig){
-}
-
 void add_process(process_data *data){
     enqueue_circular(circular_queue, data);
 }
 
 void run_round_robin(int quantum){
+    int getClk();
+
     process_data *process_to_run = dequeue_circular(circular_queue);
     if(process_to_run == NULL) return;
+    int time_to_spend = min(quantum, process_to_run->remaining_time);
     pid_t child_pid = fork();
     if(child_pid == -1)
         perror("Round Robin: error in forking process\n");
     else if(child_pid == 0){
         char time_string[64];
-        printf("Round Robin: quantum= %d, remaining time= %d\n", quantum, process_to_run->remaining_time);
-        sprintf(time_string, "%d", min(quantum, process_to_run->remaining_time));
+        sprintf(time_string, "%d", time_to_spend);
         if (execl(PROCESS_PROCESS_IMAGE_NAME, PROCESS_PROCESS_IMAGE_NAME , time_string , (char *) NULL) == -1) {
             perror("Round Robin: error in running process, terminating this child...\n");
             exit(1);
         }
+        printf("Child\n");
     }
-    else
-        pause();
+    else{
+        int curr_time = getClk();
+        char state[8];
+        if(process_to_run->start_time == -1){
+            process_to_run->start_time = curr_time; 
+            strcpy(state, "started");
+        }else
+            strcpy(state, "resumed");
+        
+
+        printf("At time %d process %d %s arr %d total %d remain %d wait %d\n",
+        curr_time, process_to_run->inner_process.ID, state, process_to_run->inner_process.arrivalTime,
+        process_to_run->inner_process.runningTime, process_to_run->remaining_time, 
+        process_to_run->start_time-process_to_run->inner_process.arrivalTime);
+        sleep(time_to_spend);
+        curr_time = getClk();
+        process_to_run->remaining_time-=time_to_spend;
+        if(process_to_run->remaining_time == 0)
+            printf("At time %d process %d ended arr %d total %d remain %d wait %d TA %d WTA %.3f\n",
+            curr_time, process_to_run->inner_process.ID, process_to_run->inner_process.arrivalTime,
+            process_to_run->inner_process.runningTime, process_to_run->remaining_time, 
+            process_to_run->start_time-process_to_run->inner_process.arrivalTime, 
+            curr_time-process_to_run->start_time, 
+            (float)(curr_time-process_to_run->start_time)/(float)process_to_run->inner_process.runningTime);
+        else
+            printf("At time %d process %d stopped arr %d total %d remain %d wait %d\n",
+            curr_time, process_to_run->inner_process.ID, process_to_run->inner_process.arrivalTime,
+            process_to_run->inner_process.runningTime, process_to_run->remaining_time, 
+            process_to_run->start_time-process_to_run->inner_process.arrivalTime);
+    }
 
 }
 
@@ -76,9 +106,9 @@ void round_robin(int quantum){
     process pD;
     int msg_status = -1;
 
-    while(msg_status != 1){
+    while(msg_status != 1 || !empty_circular(circular_queue)){
 
-        //run_round_robin(quantum);
+        run_round_robin(quantum);
 
         if ((msg_status = Recmsg(&pD)) == 1)
             break;

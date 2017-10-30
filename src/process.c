@@ -13,7 +13,6 @@ int main(int agrc, char * argv[])
     //TODO: it needs to get the remaining time from somewhere
     //remainingtime = ??;
     remaining_time = atoi(argv[1]);
-    printf("Process: remaining time = %d\n", remaining_time);
     while (remaining_time > 0)
     {
         sleep(1);
