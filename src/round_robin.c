@@ -4,31 +4,45 @@
 
 #include <stdio.h>
 
-static process_queue *circular_queue;
+static struct process_data_queue_struct{
+    generic_queue_head * head;
+}*circular_queue;
+typedef struct process_data_queue_struct process_data_queue;
 
-bool enqueue_circular(process_queue * queue, process * new_node){
-    if(!enqueue(queue, new_node)) return 0;
-    queue->head->last->next = queue->head->first;
-    return 1;
+process_data_queue *init_circular_queue(){
+    process_data_queue *queue = (process_data_queue *)malloc(sizeof(process_data_queue));
+    queue->head = init_generic_queue();
+    return queue;
 }
 
-process * dequeue_circular(process_queue * queue){
-    process *deq_process = dequeue(queue);
-    queue->head->last->next = queue->head->first;
-    
+bool enqueue_circular(process_data_queue *queue, process_data *new_node){
+    bool ret = generic_queue_enqueue(queue->head , (void *)new_node);
+    if(ret == false) return false;
+    queue->head->last = queue->head->first;
+    return true;
 }
 
-bool empty_circular(process_queue * queue){
-    return empty(queue);
+process_data *dequeue_circular(process_data_queue *queue){
+    process_data *data = (process_data *)generic_queue_dequeue(queue->head);
+    queue->head->last = queue->head->first;
+    return data;
 }
 
-static volatile int punt;
+bool empty_circular(process_data_queue *queue){
+    return generic_queue_empty(queue->head);
+}
+
 static void sig_handler(int sig){
-    punt = 1;
 }
 
-void create_process(process_data data, int timeout){
-    printf("Round Robin: %d\n",data.inner_process.arrivalTime);
+void add_process(process_data data){
+    enqueue_circular(circular_queue, &data);
+    printf("Round Robin: prcess add with id: %d\n", data.inner_process.ID);
+}
+
+void run_round_robin(int quantum){
+    process_data *process_to_run = dequeue_circular(circular_queue);
+    if(process_to_run == NULL) return;
 }
 
 void round_robin(int quantum){
@@ -36,17 +50,24 @@ void round_robin(int quantum){
     int getClk();
     int Recmsg(process * pData);
 
+    circular_queue = init_circular_queue();
     process pD;
-    int msg_status;
+    process_data data;
+    int msg_status = -1;
 
-    while((msg_status = Recmsg(&pD)) != 1){
+    while(msg_status != 1){
 
-        while ( msg_status == -1)
-            msg_status = Recmsg(&pD);
+        run_round_robin(quantum);
 
-        process_data data = *init_process_data(&pD);
-        printf("Round Robin: current time is: %d.", getClk());
-        create_process(data, quantum);
+        if ((msg_status = Recmsg(&pD)) == 1)
+            return;
+        else if(msg_status == 0){
+            while(msg_status == 0){
+                data = *init_process_data(&pD);
+                printf("Round Robin: current time is: %d.", getClk());
+                add_process(data);
+                msg_status = Recmsg(&pD);
+            }
+        }
     }
-    
 }
