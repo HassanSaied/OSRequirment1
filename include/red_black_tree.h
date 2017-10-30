@@ -1,3 +1,6 @@
+#ifndef OSREQUIRMENT_RED_BLACK_TREE_H
+#define OSREQUIRMENT_RED_BLACK_TREE_H
+
 #ifdef DMALLOC
 #include <dmalloc.h>
 #endif
@@ -65,3 +68,7 @@ rb_red_blk_node* TreeSuccessor(rb_red_blk_tree*,rb_red_blk_node*);
 rb_red_blk_node* RBExactQuery(rb_red_blk_tree*, void*);
 stk_stack * RBEnumerate(rb_red_blk_tree* tree,void* low, void* high);
 void NullFunction(void*);
+
+int compare(const void* a,const void* b);
+void print(const void * key);
+#endif

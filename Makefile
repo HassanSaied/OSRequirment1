@@ -11,7 +11,7 @@ BUILDDIR=build
 
 LIBS=
 
-_DEPS =clk_utilities.h generic_queue.h process_queue.h queue_utilities.h defs.h headers.h process_struct.h highest_priority_first.h shortest_remaining_time_first.h round_robin.h cpu_util.h process_data.h red_black_tree.h stack.h misc.h red_black_tree.h
+_DEPS =clk_utilities.h generic_queue.h process_queue.h queue_utilities.h defs.h headers.h process_struct.h highest_priority_first.h shortest_remaining_time_first.h round_robin.h cpu_util.h process_data.h hpf_red_black_tree.h stack.h misc.h red_black_tree.h
 
 DEPS = $(patsubst %,$(IDIR)/%,$(_DEPS))
 
@@ -22,8 +22,8 @@ OBJ = $(patsubst %,$(ODIR)/%,$(_OBJ))
 _CLK_SOURCE=clk.o
 _FILES_GENERATOR_SOURCE=files_generator.o
 _PROCESS_SOURCE=process.o
-_SCHEDULER_SOURCE=scheduler.o generic_queue.o process_queue.o highest_priority_first.o shortest_remaining_time_first.o round_robin.o process_data.o red_black_tree.o stack.o misc.o process_red_black_tree.o
-_PROCESS_GENERATOR_SOURCE=process_generator.o generic_queue.o process_queue.o cpu_util.o red_black_tree.o stack.o misc.o process_red_black_tree.o
+_SCHEDULER_SOURCE=scheduler.o process_data.o generic_queue.o process_queue.o highest_priority_first.o shortest_remaining_time_first.o round_robin.o process_data.o red_black_tree.o stack.o misc.o hpf_red_black_tree.o srtn_rec_black_tree.o
+_PROCESS_GENERATOR_SOURCE=process_generator.o process_data.o generic_queue.o process_queue.o cpu_util.o red_black_tree.o stack.o misc.o hpf_red_black_tree.o srtn_rec_black_tree.o
 
 CLK_SOURCE= $(patsubst %,$(ODIR)/%,$(_CLK_SOURCE))
 

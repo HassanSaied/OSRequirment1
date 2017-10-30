@@ -44,7 +44,7 @@ void round_robin(int quantum){
         while ( msg_status == -1)
             msg_status = Recmsg(&pD);
 
-        process_data data = init_process_data(&pD);
+        process_data data = *init_process_data(&pD);
         printf("Round Robin: current time is: %d.", getClk());
         create_process(data, quantum);
     }

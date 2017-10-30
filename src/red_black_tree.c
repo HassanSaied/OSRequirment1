@@ -662,7 +662,15 @@ stk_stack* RBEnumerate(rb_red_blk_tree* tree, void* low, void* high) {
   }
   return(enumResultStack);
 }
-      
+
+int compare(const void* a,const void* b) {
+  if(*(int*)a > *(int*)b) return(1);
+  if(*(int*)a < *(int*)b) return(-1);
+  return(0);
+}
+void print(const void * key)
+{
+}
     
   
   

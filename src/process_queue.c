@@ -20,3 +20,4 @@ bool empty(process_queue * queue)
 {
     return generic_queue_empty(queue->head);
 }
+

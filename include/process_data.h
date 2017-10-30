@@ -2,7 +2,7 @@
 #define OSREQUIRMENT_PROCESS_DATA_H
 
 #include <process_struct.h>
-
+#include <stdlib.h>
 struct process_data
 {
     process inner_process;
@@ -13,6 +13,6 @@ struct process_data
 };
 typedef struct process_data process_data;
 
-process_data init_process_data(process * inner_process);
+process_data * init_process_data(process *inner_process);
 
 #endif //OSREQUIRMENT_PROCESS_DATA_H

@@ -4,7 +4,9 @@
 #include <algorithms.h>
 #include <process_struct.h>
 #include <process_queue.h>
-#include <process_red_black_tree.h>
+#include <hpf_red_black_tree.h>
+#include <srtn_red_black_tree.h>
+#include <process_data.h>
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -22,27 +24,57 @@ void testReadProcess(process_queue * queue)
                currentProcess->runningTime , currentProcess->priority);
     }
 }
-void test_r_b_tree(process_queue * queue ,rb_red_blk_tree * tree)
+void print_queue(process_queue * queue)
+{
+    generic_queue_node * ptr = queue->head->first;
+    do{
+        process * current_process = (process*) ptr->data;
+        printf("%d , %d , %d , %d\n" , current_process->ID, current_process->arrivalTime,
+               current_process->runningTime , current_process->priority);
+        ptr = ptr->next;
+
+    }while (ptr !=NULL);
+}
+void test_priority_r_b_tree(process_queue * queue ,rb_red_blk_tree * tree)
 {
     //This function does an absolutely wrong cast, but it freakin' works, please use it for test only
     while(!empty(queue))
     {
         process * current_process = dequeue(queue);
-        process_tree_insert(tree , current_process);
+        hpf_tree_insert(tree, init_process_data(current_process));
     }
     while(tree->root->left != tree->nil)
     {
-        printf("%d\n",((process_data*)(max_priority_process(tree)->info))->inner_process.priority);
-        process_tree_delete(tree , max_priority_process(tree));
+        rb_red_blk_node * current_node = hpf_get_next_process(tree);
+        enqueue(queue,&(hpf_tree_delete(tree, current_node))->inner_process);
     }
-    read_process_from_file(queue);
+    print_queue(queue);
+}
+void test_time_rb_tree(process_queue * queue , rb_red_blk_tree * tree)
+{
+    while(!empty(queue))
+    {
+        process * current_process = dequeue(queue);
+        process_data* current_process_data = init_process_data(current_process);
+        srtn_tree_insert(tree, current_process_data);
+    }
+    while(tree->root->left != tree->nil)
+    {
+        rb_red_blk_node * current_node = srtn_get_next_process(tree);
+        enqueue(queue,&(srtn_tree_delete(tree, current_node))->inner_process);
+    }
+    print_queue(queue);
 }
 int main()
 {
     process_queue * queue = init();
     read_process_from_file(queue);
-    test_r_b_tree(queue , init_process_tree());
+    /*
+    test_priority_r_b_tree(queue , hpf_init_tree());
+    puts("=============================================");
+    test_time_rb_tree(queue , srtn_init_tree());
     //This is a test function, used purely for testing, remove it in the final product
+    */
     initQueue(true);
 
     printf("Please choose one of the following algorithms to use for scheduling:\n");
@@ -52,6 +84,9 @@ int main()
     while((algorithm_choice = getchar()-'0')!= HPF && algorithm_choice!= SRTN 
             && algorithm_choice!= RR){
         printf("Please enter a vaild choice!\n");
+        printf("Please choose one of the following algorithms to use for scheduling:\n");
+        printf("%d-%s\n%d-%s\n%d-%s\n", HPF, ALGORITHM_TYPE_STRINGS[HPF], 
+        SRTN, ALGORITHM_TYPE_STRINGS[SRTN], RR, ALGORITHM_TYPE_STRINGS[RR]);
         getchar(); // Get rid of enter
     }
     if(algorithm_choice == RR){
