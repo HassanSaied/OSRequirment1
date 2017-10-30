@@ -1,7 +1,9 @@
 #include <headers.h>
+#include <stdlib.h>  
+#include <stdio.h>  
 
 /* Modify this file as needed*/
-int remainingtime = 0;
+int remaining_time = 0;
 
 
 int main(int agrc, char * argv[])
@@ -10,10 +12,12 @@ int main(int agrc, char * argv[])
     //initClk();
     //TODO: it needs to get the remaining time from somewhere
     //remainingtime = ??;
-    while (remainingtime > 0)
+    remaining_time = atoi(argv[1]);
+    printf("Process: remaining time = %d\n", remaining_time);
+    while (remaining_time > 0)
     {
         sleep(1);
-        remainingtime--;
+        --remaining_time;
     }
     //if you need to use the emulated clock uncomment the following line
     //destroyClk(false);

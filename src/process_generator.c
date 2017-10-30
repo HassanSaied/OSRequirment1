@@ -114,7 +114,7 @@ int main()
     /////Toget time use the following function
     int current_second;
     process* pD = NULL;
-    while(!empty(queue)){
+    while(!empty(queue) || pD != NULL){
         current_second = getClk();
         if(pD == NULL)
             pD = dequeue(queue);
@@ -170,7 +170,6 @@ int create_clock(void){
     int clock_pid;
     if ((clock_pid = fork()) == 0)
     {
-        //This is the child
         if (execl(CLOCK_PROCESS_IMAGE_NAME , CLOCK_PROCESS_IMAGE_NAME , (char *) NULL) == -1)
         {
             puts("Error while creating the clock, terminating this child...");
