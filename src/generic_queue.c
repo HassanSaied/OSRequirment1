@@ -29,6 +29,7 @@ bool generic_queue_enqueue(generic_queue_head * head, void * new_node)
 
 void * generic_queue_dequeue(generic_queue_head * head)
 {
+    if(generic_queue_empty(head)) return NULL;
     generic_queue_node * current_first_node  = head->first;
     head->first = head->first->next;
     return current_first_node->data;
