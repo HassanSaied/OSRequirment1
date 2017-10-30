@@ -38,8 +38,9 @@ int main()
     char quantum_string[64];
     sprintf(quantum_string, "%d", quantum);
     char * const argv[] = {SCHEDULER_PROCESS_IMAGE_NAME , ALGORITHM_TYPE_STRINGS[algorithm_choice], quantum_string , NULL};
-    create_scheduler(argv);
+    int scheduler_pid = create_scheduler(argv);
     //will be removed
+   
     sleep(2);
     // 3-use this function AFTER creating clock process to initialize clock, and initialize MsgQueue
     initClk();
@@ -50,27 +51,33 @@ int main()
     //===================================
     //Preimplemented Functions examples
     /////Toget time use the following function
-    int x = getClk();
-    printf("Process Generator: current time is %d\n", x);
-    //////Tosend something to the scheduler, for example send id 2
-    process pD = *dequeue(queue);
-    Sendmsg(pD); //returns -1 on failure;
+    int current_second;
+    process* pD = NULL;
+    while(!empty(queue)){
+        current_second = getClk();
+        if(pD == NULL)
+            pD = dequeue(queue);
+        if(pD->arrivalTime == current_second){
+            Sendmsg(*pD); //returns -1 on failure;
+            pD = NULL;
+        }
+    }
     //no more processes, send end of transmission message
     lastSend();
     //////////To clear all resources
+    int child_status;
+    waitpid(scheduler_pid, &child_status, 0);
     clear_resources(0);
     //======================================
 }
 
-void clear_resources(int x)
-{
+void clear_resources(int x){
     msgctl(qid, IPC_RMID, (struct msqid_ds *)0);
     destroyClk(true);
     exit(0);
 }
 
-void read_process_from_file(process_queue * queue)
-{
+void read_process_from_file(process_queue * queue){
     FILE * processFile = fopen(PROCESS_FILE_NAME , "r");
     char lineIdentifier[10], ignoredEndLine;
     while (fscanf(processFile , "%s" , lineIdentifier) != EOF)
@@ -98,8 +105,7 @@ void read_process_from_file(process_queue * queue)
     return;
 }
 
-int create_clock(void)
-{
+int create_clock(void){
     int clock_pid;
     if ((clock_pid = fork()) == 0)
     {
@@ -116,8 +122,7 @@ int create_clock(void)
     }
 }
 
-int create_scheduler(char * const * argv)
-{
+int create_scheduler(char * const * argv){
     int scheduler_pid;
     if ((scheduler_pid = fork()) == 0)
     {

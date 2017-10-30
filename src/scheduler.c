@@ -24,8 +24,8 @@ int main(int argc, char * argv[])
     }
     else if (!strcmp(argv[1], "RR"))
     {
-        printf("Scheduler: Robin Round detected with quantum = %s!\n", argv[2]);
-        round_robin();
+        printf("Scheduler: Robin Round detected with quantum = %s.\n", argv[2]);
+        round_robin(atoi(argv[2]));
     }
     else
     {
