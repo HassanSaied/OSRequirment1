@@ -19,7 +19,7 @@ SET(SchedulerSourceFiles src/process_queue.c src/generic_queue.c src/highest_pri
         src/srtn_algorithm.c src/round_robin.c
         src/round_robin.c src/process_data.c src/scheduler.c
         src/red_black_tree.c src/stack.c src/misc.c src/hpf_red_black_tree.c
-        src/srtn_queue.c src/queue_utilities.c src/clk_utilities.c)
+        src/srtn_queue.c src/queue_utilities.c src/clk_utilities.c src/logger.c)
 
 SET(ClockSourceFiles src/clk.c  src/generic_queue.c)
 

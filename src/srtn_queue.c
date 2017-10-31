@@ -29,7 +29,7 @@ process_data * srtn_queue_pop(void)
     return process_data_ptr;
 }
 
-void srtn_queue_destroy(rb_red_blk_tree *tree)
+void srtn_queue_destroy(void)
 {
     RBTreeDestroy(tree);
 }

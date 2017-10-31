@@ -50,6 +50,7 @@ int main()
                 perror("Error sending message to the scheduler");
                 abort();
             }
+            free(pD);
             pD = dequeue(queue);
         } while (pD != NULL && pD->arrivalTime == clk);
         kill(scheduler_pid, SIGUSR1);

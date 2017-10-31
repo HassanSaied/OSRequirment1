@@ -14,5 +14,6 @@ typedef struct process_data
 } process_data;
 
 process_data * process_data_init(process_struct * process);
+void process_data_destroy(process_data * process);
 
 #endif //OSREQUIRMENT_PROCESS_DATA_H

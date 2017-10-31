@@ -22,17 +22,20 @@ void logger_log(process_data * data)
     switch (data->state)
     {
         case STOPPED:
-            fprintf(log_file, "At time %d process %d stopped arr %d total %d remain %d wait %d", clk, id, arr, total, remain, wait);
+            fprintf(log_file, "At time %d process %d stopped arr %d total %d remain %d wait %d\n", clk, id, arr, total, remain, wait);
             break;
         case STARTED:
-            fprintf(log_file, "At time %d process %d started arr %d total %d remain %d wait %d", clk, id, arr, total, remain, wait);
+            fprintf(log_file, "At time %d process %d started arr %d total %d remain %d wait %d\n", clk, id, arr, total, remain, wait);
             break;
         case RESUMED:
-            fprintf(log_file, "At time %d process %d resumed arr %d total %d remain %d wait %d", clk, id, arr, total, remain, wait);
+            fprintf(log_file, "At time %d process %d resumed arr %d total %d remain %d wait %d\n", clk, id, arr, total, remain, wait);
             break;
         case FINISHED:
             TA = data->finish_time - arr;
-            fprintf(log_file, "At time %d process %d finished arr %d total %d remain %d wait %d TA %d WTA %f", clk, id, arr, total, 0, TA - total, TA, (double) TA / total);
+            if(!(TA % total))
+                fprintf(log_file, "At time %d process %d finished arr %d total %d remain %d wait %d TA %d WTA %d\n", clk, id, arr, total, 0, TA - total, TA, TA / total);
+            else
+                fprintf(log_file, "At time %d process %d finished arr %d total %d remain %d wait %d TA %d WTA %.2f\n", clk, id, arr, total, 0, TA - total, TA, (double) TA / total);
             break;
         default:
             perror("Allowed states: started, resumed, stopped, finished");
