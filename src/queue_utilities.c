@@ -1,6 +1,3 @@
-//
-// Created by hassan on 10/30/17.
-//
 #include <queue_utilities.h>
 
 void initQueue(bool flag)
@@ -26,7 +23,7 @@ void initQueue(bool flag)
 }
 
 
-int Sendmsg(process pData)
+int Sendmsg(process_struct pData)
 {
     struct messagebuffer msg;
     msg.data = pData;
@@ -34,7 +31,7 @@ int Sendmsg(process pData)
     return msgsnd(qid, &msg, sizeof(msg) - sizeof(long), !IPC_NOWAIT);
 }
 
-int Recmsg(process * pData)
+int Recmsg(process_struct * pData)
 {
     struct messagebuffer msg;
     msg.mtype = 1L;

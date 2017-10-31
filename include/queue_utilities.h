@@ -12,7 +12,7 @@
 #include <unistd.h>
 #include <signal.h>
 #include <process_struct.h>
-#include "defs.h"
+#include <defs.h>
 
 #define QUEUEKEY 777
 #define ENDTYPE 19L
@@ -25,16 +25,16 @@ int qid;
 struct messagebuffer
 {
     long mtype;
-    process data;
+    process_struct data;
 };
 
 
 void initQueue(bool flag);
 
 
-int Sendmsg(process pData);
+int Sendmsg(process_struct pData);
 
-int Recmsg(process * pData);
+int Recmsg(process_struct * pData);
 
 
 void lastSend();

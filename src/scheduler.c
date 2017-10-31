@@ -1,6 +1,6 @@
 #include <clk_utilities.h>
 #include <highest_priority_first.h>
-#include <shortest_remaining_time_first.h>
+#include <srtn_algorithm.h>
 #include <round_robin.h>
 #include <process_data.h>
 #include <queue_utilities.h>
@@ -10,16 +10,16 @@ int main(int argc, char * argv[])
 {
     initQueue(false);
     initClk();
-    printf("Process generator: entered with algorithm type: %s.\n", argv[1]);
+    signal(SIGUSR1, SIG_IGN);
     if (!strcmp(argv[1], "HPF"))
     {
-        printf("Scheduler: Highiest Priority First  detected!\n");
+        printf("Scheduler: Highest Priority First detected!\n");
         highest_priority_first();
     }
     else if (!strcmp(argv[1], "SRTN"))
     {
         printf("Scheduler: Shortest Remaining Time Next detected!\n");
-        shortest_remaining_time_first();
+        shortest_remaining_time_next();
     }
     else if (!strcmp(argv[1], "RR"))
     {
@@ -31,4 +31,5 @@ int main(int argc, char * argv[])
         printf("Error 404: Algorithm NOT found!\n");
         exit(1);
     }
+    printf("Scheduler: done!\n");
 }

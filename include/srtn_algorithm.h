@@ -1,0 +1,5 @@
+#ifndef OSREQUIRMENT_SRTN_ALGORITHM_H
+#define OSREQUIRMENT_SRTN_ALGORITHM_H
+
+void shortest_remaining_time_next();
+#endif //OSREQUIRMENT_SRTN_ALGORITHM_H

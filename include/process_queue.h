@@ -10,8 +10,8 @@ struct process_queue
 typedef struct process_queue process_queue;
 process_queue * init();
 
-bool enqueue(process_queue * queue, process * new_node);
-process * dequeue(process_queue * queue);
+bool enqueue(process_queue * queue, process_struct * new_node);
+process_struct * dequeue(process_queue * queue);
 bool empty(process_queue * queue);
 
 #endif //OSREQUIRMENT_PROCESS_QUEUE_H

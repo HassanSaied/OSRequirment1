@@ -12,7 +12,7 @@ rb_red_blk_tree * hpf_init_tree(void)
 
 rb_red_blk_node * hpf_tree_insert(rb_red_blk_tree *tree, process_data *data)
 {
-    return RBTreeInsert(tree , &(data->inner_process.priority) ,data);
+    return RBTreeInsert(tree , &(data->process.priority) ,data);
 }
 
 process_data * hpf_tree_delete(rb_red_blk_tree *tree, rb_red_blk_node *node)

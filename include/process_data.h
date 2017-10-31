@@ -3,17 +3,16 @@
 
 #include <process_struct.h>
 #include <stdlib.h>
-struct process_data
+typedef struct process_data
 {
-    process inner_process;
-    enum {WAITING , RUNNING,FINISHED} state;
+    process_struct process;
+    pid_t pid;
+    enum {STOPPED, STARTED, RESUMED, FINISHED} state;
     int start_time;
     int remaining_time;
     int finish_time;
+} process_data;
 
-};
-typedef struct process_data process_data;
-
-process_data * init_process_data(process *inner_process);
+process_data * process_data_init(process_struct * process);
 
 #endif //OSREQUIRMENT_PROCESS_DATA_H

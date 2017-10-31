@@ -75,24 +75,24 @@ void run_round_robin(int quantum){
         
 
         printf("At time %d process %d %s arr %d total %d remain %d wait %d\n",
-        curr_time, process_to_run->inner_process.ID, state, process_to_run->inner_process.arrivalTime,
-        process_to_run->inner_process.runningTime, process_to_run->remaining_time, 
-        process_to_run->start_time-process_to_run->inner_process.arrivalTime);
+        curr_time, process_to_run->process.id, state, process_to_run->process.arrivalTime,
+        process_to_run->process.runningTime, process_to_run->remaining_time, 
+        process_to_run->start_time-process_to_run->process.arrivalTime);
         sleep(time_to_spend);
         curr_time = getClk();
         process_to_run->remaining_time-=time_to_spend;
         if(process_to_run->remaining_time == 0)
             printf("At time %d process %d ended arr %d total %d remain %d wait %d TA %d WTA %.3f\n",
-            curr_time, process_to_run->inner_process.ID, process_to_run->inner_process.arrivalTime,
-            process_to_run->inner_process.runningTime, process_to_run->remaining_time, 
-            process_to_run->start_time-process_to_run->inner_process.arrivalTime, 
+            curr_time, process_to_run->process.id, process_to_run->process.arrivalTime,
+            process_to_run->process.runningTime, process_to_run->remaining_time, 
+            process_to_run->start_time-process_to_run->process.arrivalTime, 
             curr_time-process_to_run->start_time, 
-            (float)(curr_time-process_to_run->start_time)/(float)process_to_run->inner_process.runningTime);
+            (float)(curr_time-process_to_run->start_time)/(float)process_to_run->process.runningTime);
         else
             printf("At time %d process %d stopped arr %d total %d remain %d wait %d\n",
-            curr_time, process_to_run->inner_process.ID, process_to_run->inner_process.arrivalTime,
-            process_to_run->inner_process.runningTime, process_to_run->remaining_time, 
-            process_to_run->start_time-process_to_run->inner_process.arrivalTime);
+            curr_time, process_to_run->process.id, process_to_run->process.arrivalTime,
+            process_to_run->process.runningTime, process_to_run->remaining_time, 
+            process_to_run->start_time-process_to_run->process.arrivalTime);
     }
 
 }
@@ -100,10 +100,10 @@ void run_round_robin(int quantum){
 void round_robin(int quantum){
 
     int getClk();
-    int Recmsg(process * pData);
+    int Recmsg(process_struct * pData);
 
     circular_queue = init_circular_queue();
-    process pD;
+    process_struct pD;
     int msg_status = -1;
 
     while(msg_status != 1 || !empty_circular(circular_queue)){
@@ -115,7 +115,7 @@ void round_robin(int quantum){
         else if(msg_status == 0){
             while(msg_status == 0){
                 process_data *data = (process_data *) malloc(sizeof(process_data));
-                data = init_process_data(&pD);
+                data = process_data_init(&pD);
                 add_process(data);
                 msg_status = Recmsg(&pD);
             }

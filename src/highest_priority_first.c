@@ -23,7 +23,7 @@ void highest_priority_first()
     rb_red_blk_tree* tree =  hpf_init_tree();
     while (!last_received_process || !hpf_tree_empty(tree)) {
         int rec_msg_code;
-        process * current_received_process = (process*)malloc(sizeof(process));
+        process_struct * current_received_process = (process_struct*)malloc(sizeof(process_struct));
         //wait till something arrives
         do
         {
@@ -32,9 +32,9 @@ void highest_priority_first()
         //keep reading while there is something
         while (rec_msg_code == 0)
         {
-            hpf_tree_insert(tree , init_process_data((current_received_process)));
-            /*printf("Received Process With ID: %d, Priority: %d, RunningTime: %d, at Time: %d\n",
-                   current_received_process->ID , current_received_process->priority , current_received_process->runningTime,
+            hpf_tree_insert(tree , process_data_init((current_received_process)));
+            /*printf("Received Process With id: %d, Priority: %d, RunningTime: %d, at Time: %d\n",
+                   current_received_process->id , current_received_process->priority , current_received_process->runningTime,
                    current_received_process->arrivalTime);*/
             rec_msg_code = Recmsg(current_received_process);
         }
@@ -56,20 +56,20 @@ void highest_priority_first()
         } else //parent
         {
             current_process->start_time = getClk();
-            current_process->state = RUNNING;
+            current_process->state = STARTED;
             printf("At time %d process %d started arr %d total %d remain %d wait %d\n",
-                    getClk(),current_process->inner_process.ID,current_process->inner_process.arrivalTime,
-            current_process->inner_process.runningTime,current_process->remaining_time,0);
+                    getClk(),current_process->process.id,current_process->process.arrivalTime,
+            current_process->process.runningTime,current_process->remaining_time,0);
             int stat;
             waitpid(current_process_pid , &stat , 0);
             current_process->remaining_time=0;
             current_process->finish_time = getClk();
             current_process->state = FINISHED;
-            int TA = current_process->start_time-current_process->inner_process.arrivalTime;
+            int TA = current_process->start_time-current_process->process.arrivalTime;
             printf("At time %d process %d finished arr %d total %d remain %d wait %d TA %d WTA %.2f\n",
-                   getClk(),current_process->inner_process.ID,current_process->inner_process.arrivalTime,
-                   current_process->inner_process.runningTime,current_process->remaining_time,0,TA,
-                   (double)TA/current_process->inner_process.runningTime);
+                   getClk(),current_process->process.id,current_process->process.arrivalTime,
+                   current_process->process.runningTime,current_process->remaining_time,0,TA,
+                   (double)TA/current_process->process.runningTime);
             hpf_tree_delete(tree,current_node);
             //Decide whether I want to do any thing with the process or not
         }
