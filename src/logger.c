@@ -10,7 +10,7 @@ void logger_init()
     log_file = fopen("scheduler.log", "w");
 }
 
-void logger_log(process_data * data)
+void logger_log(process_data *data)
 {
     int clk = getClk();
     int id = data->process.id;
