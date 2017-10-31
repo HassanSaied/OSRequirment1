@@ -73,8 +73,13 @@ void run_parent(int quantum, process_data *pro){
     sleep(quantum);
 
     pro->remaining_time -= quantum;
-    pro->state = (pro->remaining_time>0 ? STOPPED:FINISHED);
+    if(pro->remaining_time > 0)
+        pro->state = STOPPED;
+    else{
+        pro->state = FINISHED;
+    }
     logger_log(pro);
+    pro->state == FINISHED? free(pro):enqueue_circular(circular_queue, pro);
 }
 
 void run_round_robin(int quantum){
@@ -97,15 +102,17 @@ void round_robin(int quantum){
     circular_queue = init_circular_queue();
     process_struct pD;
     int msg_status;
+    int flag = 0;
 
     do{
-
         run_round_robin(quantum);
 
         while((msg_status = Recmsg(&pD))  == 0){
-                process_data *data = (process_data *) malloc(sizeof(process_data));
+                process_data *data = (process_data *)malloc(sizeof(process_data));
                 data = process_data_init(&pD);
                 add_process(data);
         }
-    }while(msg_status != 1 || !empty_circular(circular_queue));
+        if(msg_status == 1) flag = 1;
+    }while(flag != 1 || !empty_circular(circular_queue));
+    free(circular_queue);
 }
