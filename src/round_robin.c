@@ -1,11 +1,14 @@
 #include <round_robin.h>
 #include <process_data.h>
+#include <process_struct.h>
+
 #include <stdlib.h>  
 #include <stdio.h>
-#include  <sys/types.h>
 #include <unistd.h>
-#include <sys/wait.h>
 #include <string.h>
+
+#include <sys/wait.h>
+#include  <sys/types.h>
 
 #define min(a,b) a<b ? a:b
 
@@ -46,79 +49,72 @@ void add_process(process_data *data){
     enqueue_circular(circular_queue, data);
 }
 
+void run_child(int quantum, process_data *pro){
+    int getClk();
+    int curr_time = getClk();
+    char time_string[64];
+
+    sprintf(time_string, "%d", quantum);
+    if(pro->start_time == -1){
+        pro->start_time = curr_time; 
+        pro->state = STARTED;
+    }else
+        pro->state = RESUMED;
+
+    logger_log(pro);
+
+    if (execl(PROCESS_PROCESS_IMAGE_NAME, PROCESS_PROCESS_IMAGE_NAME , time_string , (char *) NULL) == -1) {
+        perror("Round Robin: error in running process, terminating this child...\n");
+        exit(1);
+    }
+}
+
+void run_parent(process_data *pro, int time){
+    int getClk();
+
+    sleep(time);
+    int curr_time = getClk();
+
+    pro->remaining_time -= time;
+    pro->state = (pro->remaining_time <= 0? STOPPED:FINISHED);
+    logger_log(pro);
+}
+
 void run_round_robin(int quantum){
     int getClk();
 
-    process_data *process_to_run = dequeue_circular(circular_queue);
-    if(process_to_run == NULL) return;
-    int time_to_spend = min(quantum, process_to_run->remaining_time);
+    process_data *pro = dequeue_circular(circular_queue);
+    if(pro == NULL) return;
+
+    int time_to_spend = min(quantum, pro->remaining_time);
+
     pid_t child_pid = fork();
     if(child_pid == -1)
         perror("Round Robin: error in forking process\n");
-    else if(child_pid == 0){
-        char time_string[64];
-        sprintf(time_string, "%d", time_to_spend);
-        if (execl(PROCESS_PROCESS_IMAGE_NAME, PROCESS_PROCESS_IMAGE_NAME , time_string , (char *) NULL) == -1) {
-            perror("Round Robin: error in running process, terminating this child...\n");
-            exit(1);
-        }
-        printf("Child\n");
-    }
-    else{
-        int curr_time = getClk();
-        char state[8];
-        if(process_to_run->start_time == -1){
-            process_to_run->start_time = curr_time; 
-            strcpy(state, "started");
-        }else
-            strcpy(state, "resumed");
-        
-
-        printf("At time %d process %d %s arr %d total %d remain %d wait %d\n",
-        curr_time, process_to_run->process.id, state, process_to_run->process.arrivalTime,
-        process_to_run->process.runningTime, process_to_run->remaining_time, 
-        process_to_run->start_time-process_to_run->process.arrivalTime);
-        sleep(time_to_spend);
-        curr_time = getClk();
-        process_to_run->remaining_time-=time_to_spend;
-        if(process_to_run->remaining_time == 0)
-            printf("At time %d process %d ended arr %d total %d remain %d wait %d TA %d WTA %.3f\n",
-            curr_time, process_to_run->process.id, process_to_run->process.arrivalTime,
-            process_to_run->process.runningTime, process_to_run->remaining_time, 
-            process_to_run->start_time-process_to_run->process.arrivalTime, 
-            curr_time-process_to_run->start_time, 
-            (float)(curr_time-process_to_run->start_time)/(float)process_to_run->process.runningTime);
-        else
-            printf("At time %d process %d stopped arr %d total %d remain %d wait %d\n",
-            curr_time, process_to_run->process.id, process_to_run->process.arrivalTime,
-            process_to_run->process.runningTime, process_to_run->remaining_time, 
-            process_to_run->start_time-process_to_run->process.arrivalTime);
-    }
+    else if(child_pid == 0)
+        run_child(quantum, pro);
+    else
+        run_parent(pro, time_to_spend);
 
 }
 
 void round_robin(int quantum){
 
     int getClk();
-    int Recmsg(process_struct * pData);
+    int Recmsg(process_struct *pData);
 
     circular_queue = init_circular_queue();
     process_struct pD;
-    int msg_status = -1;
+    int msg_status;
 
-    while(msg_status != 1 || !empty_circular(circular_queue)){
+    do{
 
         run_round_robin(quantum);
 
-        if ((msg_status = Recmsg(&pD)) == 1)
-            break;
-        else if(msg_status == 0){
-            while(msg_status == 0){
+        while((msg_status = Recmsg(&pD))  == 0){
                 process_data *data = (process_data *) malloc(sizeof(process_data));
                 data = process_data_init(&pD);
                 add_process(data);
-                msg_status = Recmsg(&pD);
-            }
         }
-    }
+    }while(msg_status != 1 || !empty_circular(circular_queue));
 }
