@@ -1,6 +1,7 @@
 #include <round_robin.h>
 #include <process_data.h>
 #include <process_struct.h>
+#include <logger.h>
 
 #include <stdlib.h>  
 #include <stdio.h>
@@ -60,7 +61,6 @@ void run_child(int quantum, process_data *pro){
         pro->state = STARTED;
     }else
         pro->state = RESUMED;
-
     logger_log(pro);
 
     if (execl(PROCESS_PROCESS_IMAGE_NAME, PROCESS_PROCESS_IMAGE_NAME , time_string , (char *) NULL) == -1) {
@@ -90,9 +90,9 @@ void run_round_robin(int quantum){
 
     pid_t child_pid = fork();
     if(child_pid == -1)
-        perror("Round Robin: error in forking process\n");
+        perror("Round Robin: error in forking process.\n");
     else if(child_pid == 0)
-        run_child(quantum, pro);
+        run_child(time_to_spend, pro);
     else
         run_parent(pro, time_to_spend);
 
