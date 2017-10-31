@@ -1,6 +1,6 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 3.5)
 PROJECT(OSRequirment)
-set (CMAKE_CXX_STANDARD 11)
+set (CMAKE_C_STANDARD 11)
 SET(IncludedFiles include/red_black_tree.h include/stack.h include/misc.h include/red_black_tree.h include/defs.h
         include/headers.h include/process_struct.h include/clk_utilities.h
         include/queue_utilities.h include/highest_priority_first.h
