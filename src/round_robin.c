@@ -9,7 +9,7 @@
 
 #include <sys/wait.h>
 #include  <sys/types.h>
-
+#include <logger.h>
 #define min(a,b) a<b ? a:b
 
 static struct process_data_queue_struct{
