@@ -11,18 +11,18 @@ BUILDDIR=build
 
 LIBS=
 
-_DEPS =clk_utilities.h generic_queue.h process_queue.h queue_utilities.h defs.h headers.h process_struct.h highest_priority_first.h srtn_algorithm.h srtn_queue.h round_robin.h cpu_util.h process_data.h hpf_red_black_tree.h stack.h misc.h red_black_tree.h
+_DEPS =clk_utilities.h generic_queue.h process_queue.h queue_utilities.h defs.h headers.h process_struct.h highest_priority_first.h srtn_algorithm.h srtn_queue.h round_robin.h cpu_util.h process_data.h hpf_red_black_tree.h stack.h misc.h red_black_tree.h logger.h
 
 DEPS = $(patsubst %,$(IDIR)/%,$(_DEPS))
 
-_OBJ =clk.o  generic_queue.o process_generator.o scheduler.o files_generator.o process.o process_queue.o highest_priority_first.o srtn_algorithm.o srtn_queue.o round_robin.o cpu_util.o process_data.o
+_OBJ =clk.o  generic_queue.o process_generator.o scheduler.o files_generator.o process.o process_queue.o highest_priority_first.o srtn_algorithm.o srtn_queue.o round_robin.o cpu_util.o process_data.o logger.o
 
 OBJ = $(patsubst %,$(ODIR)/%,$(_OBJ))
 
 _CLK_SOURCE=clk.o
 _FILES_GENERATOR_SOURCE=files_generator.o
 _PROCESS_SOURCE=process.o clk_utilities.o
-_SCHEDULER_SOURCE=scheduler.o process_data.o generic_queue.o process_queue.o highest_priority_first.o srtn_algorithm.o round_robin.o process_data.o red_black_tree.o stack.o misc.o hpf_red_black_tree.o srtn_queue.o clk_utilities.o queue_utilities.o
+_SCHEDULER_SOURCE=scheduler.o process_data.o generic_queue.o process_queue.o highest_priority_first.o srtn_algorithm.o round_robin.o process_data.o red_black_tree.o stack.o misc.o hpf_red_black_tree.o srtn_queue.o clk_utilities.o queue_utilities.o logger.o
 _PROCESS_GENERATOR_SOURCE=process_generator.o generic_queue.o process_queue.o cpu_util.o clk_utilities.o queue_utilities.o
 
 CLK_SOURCE= $(patsubst %,$(ODIR)/%,$(_CLK_SOURCE))

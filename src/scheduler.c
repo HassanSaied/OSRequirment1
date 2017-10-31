@@ -5,12 +5,14 @@
 #include <process_data.h>
 #include <queue_utilities.h>
 #include <string.h>
+#include <logger.h>
 
 int main(int argc, char * argv[])
 {
     initQueue(false);
     initClk();
     signal(SIGUSR1, SIG_IGN);
+    logger_init();
     if (!strcmp(argv[1], "HPF"))
     {
         printf("Scheduler: Highest Priority First detected!\n");
@@ -32,4 +34,5 @@ int main(int argc, char * argv[])
         exit(1);
     }
     printf("Scheduler: done!\n");
+    logger_destroy();
 }

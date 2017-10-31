@@ -2,6 +2,7 @@
 #include <srtn_queue.h>
 #include <clk_utilities.h>
 #include <queue_utilities.h>
+#include <logger.h>
 
 #include <stdio.h>
 #include <unistd.h>
@@ -18,8 +19,9 @@ void stop_running_process()
     kill(running_process->pid, SIGSTOP);
     running_process->remaining_time -= last_time - getClk();
     running_process->state = STOPPED;
+    printf("@T=%d SRTN: stopped %d\n", getClk(), running_process->process.id);
+    logger_log(running_process);
     srtn_queue_push(running_process);
-    printf("@T=%i SRTN: stopped %i\n", getClk(), running_process->process.id);
     running_process = NULL;
 }
 
@@ -45,14 +47,15 @@ void run_next_process()
         running_process->pid = pid;
         running_process->state = STARTED;
         running_process->start_time = clk;
-        printf("@T=%i SRTN: started %i\n", getClk(), running_process->process.id);
+        printf("@T=%d SRTN: started %d\n", getClk(), running_process->process.id);
     }
     else
     {
         kill (running_process->pid, SIGCONT);
         running_process->state = RESUMED;
-        printf("@T=%i SRTN: resumed %i\n", getClk(), running_process->process.id);
+        printf("@T=%d SRTN: resumed %d\n", getClk(), running_process->process.id);
     }
+    logger_log(running_process);
     last_time = clk;
 }
 
@@ -66,7 +69,7 @@ void sigusr1_handler(int signum)
         msg_code = Recmsg(received_process);
         if (msg_code == 0)
         {
-            printf("@T=%i SRTN: received %i\n", getClk(), received_process->id);
+            printf("@T=%d SRTN: received %d\n", getClk(), received_process->id);
             srtn_queue_push(process_data_init(received_process));
         }
         else if (msg_code == 1)
@@ -90,11 +93,11 @@ void sigchld_handler(int signum)
     int status;
     if (pid = waitpid(-1, &status, WNOHANG))
     {
-        printf("@T=%i SRTN: finished %i\n", getClk(), running_process->process.id);
         running_process->remaining_time = 0;
         running_process->finish_time = getClk();
         running_process->state = FINISHED;
-        // log running_process
+        printf("@T=%d SRTN: finished %d\n", getClk(), running_process->process.id);
+        logger_log(running_process);
         // save running_process somewhere or free it
         if (running_process->pid == pid)
         {
