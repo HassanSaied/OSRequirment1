@@ -30,11 +30,11 @@ int main()
     if (!strcmp(algorithm, "RR"))
         scanf("%i", &quantum);
 
-    create_clock();
     char quantum_string[64];
     sprintf(quantum_string, "%d", quantum);
     char * argv[] = {SCHEDULER_PROCESS_IMAGE_NAME, algorithm, quantum_string , NULL};
     int scheduler_pid = create_scheduler(argv);
+    create_clock();
     initClk();
 
     process_struct * pD = dequeue(queue);
