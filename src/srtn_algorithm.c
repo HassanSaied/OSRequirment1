@@ -27,6 +27,8 @@ void stop_running_process()
 
 void run_next_process()
 {
+    if (srtn_queue_empty())
+        return;
     running_process = srtn_queue_pop();
     int clk = getClk();
     if (running_process->pid == -1)
@@ -108,9 +110,13 @@ void sigchld_handler(int signum)
             perror("Should never print this message");
             abort();
         }
+        signal(SIGUSR1, sigusr1_handler);
+        raise(SIGUSR1);
     }
-    signal(SIGUSR1, sigusr1_handler);
-    raise(SIGUSR1);
+    else
+    {
+        signal(SIGUSR1, sigusr1_handler);
+    }
 }
 
 void shortest_remaining_time_next()
@@ -123,7 +129,7 @@ void shortest_remaining_time_next()
     signal(SIGUSR1, sigusr1_handler);
     signal(SIGCHLD, sigchld_handler);
     
-    while (!done_receiving || !srtn_queue_empty())
+    while (!done_receiving || !srtn_queue_empty() || running_process != NULL)
         pause();
 
     // LOG CPU utilization, Avg WTA, Avg Waiting, Std WTA
