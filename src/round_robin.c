@@ -50,18 +50,9 @@ void add_process(process_data *data){
     enqueue_circular(circular_queue, data);
 }
 
-void run_child(int quantum, process_data *pro){
-    int getClk();
-    int curr_time = getClk();
+void run_child(int quantum){
     char time_string[64];
-
     sprintf(time_string, "%d", quantum);
-    if(pro->start_time == -1){
-        pro->start_time = curr_time; 
-        pro->state = STARTED;
-    }else
-        pro->state = RESUMED;
-    logger_log(pro);
 
     if (execl(PROCESS_PROCESS_IMAGE_NAME, PROCESS_PROCESS_IMAGE_NAME , time_string , (char *) NULL) == -1) {
         perror("Round Robin: error in running process, terminating this child...\n");
@@ -69,38 +60,36 @@ void run_child(int quantum, process_data *pro){
     }
 }
 
-void run_parent(process_data *pro, int time){
-    int getClk();
+void run_parent(int quantum, process_data *pro){
+    if(pro->start_time == -1){
+        pro->start_time = getClk(); 
+        pro->state = STARTED;
+    }else
+        pro->state = RESUMED;
+    logger_log(pro);
+   
+    sleep(quantum);
 
-    sleep(time);
-    int curr_time = getClk();
-
-    pro->remaining_time -= time;
-    pro->state = (pro->remaining_time <= 0? STOPPED:FINISHED);
+    pro->remaining_time -= quantum;
+    pro->state = (pro->remaining_time>0 ? STOPPED:FINISHED);
     logger_log(pro);
 }
 
 void run_round_robin(int quantum){
-    int getClk();
-
     process_data *pro = dequeue_circular(circular_queue);
     if(pro == NULL) return;
-
-    int time_to_spend = min(quantum, pro->remaining_time);
 
     pid_t child_pid = fork();
     if(child_pid == -1)
         perror("Round Robin: error in forking process.\n");
     else if(child_pid == 0)
-        run_child(time_to_spend, pro);
+        run_child(quantum);
     else
-        run_parent(pro, time_to_spend);
+        run_parent(quantum, pro);
 
 }
 
 void round_robin(int quantum){
-
-    int getClk();
     int Recmsg(process_struct *pData);
 
     circular_queue = init_circular_queue();
