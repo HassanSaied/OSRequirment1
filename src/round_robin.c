@@ -61,6 +61,8 @@ void run_child(int quantum){
 }
 
 void run_parent(int quantum, process_data *pro){
+    int getClk();
+
     if(pro->start_time == -1){
         pro->start_time = getClk(); 
         pro->state = STARTED;
