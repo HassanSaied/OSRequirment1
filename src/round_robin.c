@@ -13,6 +13,8 @@
 #include <logger.h>
 #define min(a,b) a<b ? a:b
 
+static int rr_quant;
+
 static struct process_data_queue_struct{
     generic_queue_head * head;
 }*circular_queue;
@@ -50,62 +52,54 @@ void add_process(process_data *data){
     enqueue_circular(circular_queue, data);
 }
 
-void run_child(int quantum){
-    char time_string[64];
-    sprintf(time_string, "%d", quantum);
-
-    if (execl(PROCESS_PROCESS_IMAGE_NAME, PROCESS_PROCESS_IMAGE_NAME , time_string , (char *) NULL) == -1) {
-        perror("Round Robin: error in running process, terminating this child...\n");
-        exit(1);
-    }
-}
-
-void run_parent(int quantum, process_data *pro){
+void start_process(process_data *pro){
     int getClk();
-
-    if(pro->start_time == -1){
-        pro->start_time = getClk(); 
-        pro->state = STARTED;
-    }else
-        pro->state = RESUMED;
-    logger_log(pro);
-   
-    sleep(quantum);
-
-    pro->remaining_time -= quantum;
-    if(pro->remaining_time > 0)
-        pro->state = STOPPED;
-    else{
-        pro->state = FINISHED;
-    }
-    logger_log(pro);
-    pro->state == FINISHED? free(pro):enqueue_circular(circular_queue, pro);
-}
-
-void run_round_robin(int quantum){
-    process_data *pro = dequeue_circular(circular_queue);
-    if(pro == NULL) return;
 
     pid_t child_pid = fork();
     if(child_pid == -1)
         perror("Round Robin: error in forking process.\n");
-    else if(child_pid == 0)
-        run_child(quantum);
-    else
-        run_parent(quantum, pro);
+    else if(child_pid == 0){
+        char time_string[64];
+        sprintf(time_string, "%d", pro->process.runningTime);
+    
+        if (execl(PROCESS_PROCESS_IMAGE_NAME, PROCESS_PROCESS_IMAGE_NAME , time_string , (char *) NULL) == -1) {
+            perror("Round Robin: error in running process, terminating this child...\n");
+            exit(1);
+        }
+    }
+    else{
+        pro->state = STARTED;
+        pro->start_time = getClk(); 
+        pro->pid = child_pid;
+        logger_log(pro);
+
+        sleep(rr_quant);
+
+
+    }
+}
+
+void run_round_robin(){
+    process_data *pro;
+    if((pro = dequeue_circular(circular_queue)) == NULL) return;
+    
+    if(pro->start_time == -1){
+       start_process(pro);
+    }
 
 }
 
 void round_robin(int quantum){
     int Recmsg(process_struct *pData);
 
+    rr_quant = quantum;
     circular_queue = init_circular_queue();
     process_struct pD;
     int msg_status;
     int flag = 0;
 
     do{
-        run_round_robin(quantum);
+        run_round_robin();
 
         while((msg_status = Recmsg(&pD))  == 0){
                 process_data *data = (process_data *)malloc(sizeof(process_data));
