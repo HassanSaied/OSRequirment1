@@ -59,7 +59,7 @@ void rr_wake_up(int sleep_stat){
 
     if(!sleep_stat){
         kill(curr_pro->pid, SIGSTOP);
-        if((curr_pro->remaining_time -= rr_quant) != 0){
+        if(!(curr_pro->remaining_time -= rr_quant)){
             curr_pro->state = STOPPED;
             logger_log(curr_pro);
             enqueue_circular(circular_queue, curr_pro);

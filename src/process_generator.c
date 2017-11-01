@@ -3,6 +3,8 @@
 #include <defs.h>
 #include <process_struct.h>
 #include <process_queue.h>
+#include <cpu_util.h>
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -16,6 +18,7 @@ int main()
 {
     process_queue * queue = init();
     read_process_from_file(queue);
+    int free_time = get_free_time(queue);
     initQueue(true);
 
     char algorithm[5];
@@ -30,9 +33,10 @@ int main()
     if (!strcmp(algorithm, "RR"))
         scanf("%i", &quantum);
 
-    char quantum_string[64];
+    char quantum_string[64], free_time_string[12];
     sprintf(quantum_string, "%d", quantum);
-    char * argv[] = {SCHEDULER_PROCESS_IMAGE_NAME, algorithm, quantum_string , NULL};
+    sprintf(free_time_string, "%d", free_time);
+    char * argv[] = {SCHEDULER_PROCESS_IMAGE_NAME, algorithm, quantum_string, free_time_string , NULL};
     int scheduler_pid = create_scheduler(argv);
     create_clock();
     initClk();

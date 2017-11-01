@@ -4,8 +4,9 @@
 #include <round_robin.h>
 #include <process_data.h>
 #include <queue_utilities.h>
-#include <string.h>
 #include <logger.h>
+
+#include <string.h>
 
 int main(int argc, char * argv[])
 {
@@ -34,6 +35,6 @@ int main(int argc, char * argv[])
         exit(1);
     }
     printf("Scheduler: done!\n");
-    logger_print_perf_file();
+    logger_print_perf_file(atoi(argv[3]));
     logger_destroy();
 }

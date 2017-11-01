@@ -11,6 +11,7 @@ double_queue * wta_queue;
 double total_wta = 0;
 int total_wait = 0;
 int process_counter = 0;
+
 void logger_init()
 {
     log_file = fopen("scheduler.log", "w");
@@ -54,10 +55,10 @@ void logger_log(process_data *data)
             abort();
     }
 }
-void logger_print_perf_file(void)
+void logger_print_perf_file(int free_time)
 {
-    //TODO: get cpu util
-    int cpu_utilization = 100;
+    int curr_time = getClk();
+    float cpu_utilization = (curr_time-free_time)/((float)curr_time)*100;
     double average_wta =  total_wta / process_counter;
     double average_wait = (double) total_wait / process_counter;
     double std_wta = 0;
@@ -67,7 +68,7 @@ void logger_print_perf_file(void)
     }
     std_wta/=process_counter;;
     std_wta = sqrt(std_wta);
-    fprintf(perf_file , "CPU utilization=%d%%\n",cpu_utilization);
+    fprintf(perf_file , "CPU utilization=%.2f%%\n",cpu_utilization);
     fprintf(perf_file,"Avg WTA=%.2f\n",average_wta);
     fprintf(perf_file,"Avg Waiting=%.2f\n",average_wait);
     fprintf(perf_file,"Std WTA=%.2f\n",std_wta);
