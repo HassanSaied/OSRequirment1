@@ -31,7 +31,10 @@ int main()
         exit(1);
     }
     if (!strcmp(algorithm, "RR"))
+    {
+        printf("RR quantum: ");
         scanf("%i", &quantum);
+    }
 
     char quantum_string[64], free_time_string[12];
     sprintf(quantum_string, "%d", quantum);

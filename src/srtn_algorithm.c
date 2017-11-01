@@ -17,7 +17,7 @@ void stop_running_process()
     if (running_process == NULL)
         return;
     kill(running_process->pid, SIGSTOP);
-    running_process->remaining_time -= last_time - getClk();
+    running_process->remaining_time -= getClk() - last_time;
     running_process->state = STOPPED;
     printf("@T=%d SRTN: stopped %d\n", getClk(), running_process->process.id);
     logger_log(running_process);
@@ -84,7 +84,6 @@ void sigusr1_handler(int signum)
             abort();
         }
     } while (msg_code == 0);
-    // TODO Free received_process
     free(received_process);
     run_next_process();
 }
@@ -101,7 +100,6 @@ void sigchld_handler(int signum)
         running_process->state = FINISHED;
         printf("@T=%d SRTN: finished %d\n", getClk(), running_process->process.id);
         logger_log(running_process);
-        // save running_process somewhere or free it, no need to save it, will delete it
         if (running_process->pid == pid)
         {
             free(running_process);
@@ -133,6 +131,4 @@ void shortest_remaining_time_next()
     
     while (!done_receiving || !srtn_queue_empty() || running_process != NULL)
         pause();
-
-    // LOG CPU utilization, Avg WTA, Avg Waiting, Std WTA
 }
