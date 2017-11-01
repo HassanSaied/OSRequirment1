@@ -57,6 +57,7 @@ void rr_add_process(process_data *data){
 void rr_wake_up(){
     int getClk();
 
+    printf("RR: Waking up.\n");
     if(curr_pro->state != FINISHED){
         kill(curr_pro->pid, SIGSTOP);
         if((curr_pro->remaining_time -= rr_quant)){
@@ -78,11 +79,10 @@ void rr_wake_up(){
 void rr_sigchild_handler(int signo){
     int getClk();
 
-    //if(signo != SIGCHLD) return;
-
     int status;
     pid_t pid;
 
+    printf("RR: Signal handler provoked\n");
     if( pid = waitpid(curr_pro->pid, &status, WNOHANG)){
         curr_pro->state = FINISHED;
         curr_pro->finish_time = getClk();
@@ -90,12 +90,12 @@ void rr_sigchild_handler(int signo){
         printf("RR: signal received.\n");
         printf("@T=%d RR: finished %d\n", getClk(), curr_pro->process.id);
         logger_log(curr_pro);
-        free(curr_pro);
     }
 }
 
 void rr_start_process(process_data *pro){
     int getClk();
+    int unslept = 0;
 
     pid_t child_pid = fork();
     if(child_pid == -1)
@@ -116,20 +116,28 @@ void rr_start_process(process_data *pro){
         curr_pro = pro;
         logger_log(curr_pro);
         printf("@T=%d RR: started %d\n", getClk(), curr_pro->process.id);
-        sleep(rr_quant);
+        while(unslept = sleep(rr_quant+1)){
+            if(curr_pro->state == FINISHED)
+                break;
+        }
         rr_wake_up();
     }
 }
 
 void rr_resume_process(process_data *pro){
     int getClk();
+    int unslept = 0;
 
     pro->state = RESUMED;
     curr_pro = pro;
     kill(curr_pro->pid, SIGCONT);
     printf("@T=%d RR: resumed %d\n", getClk(), curr_pro->process.id);
-    logger_log(curr_pro);   
-    sleep(rr_quant);
+    logger_log(curr_pro);
+    while(unslept = sleep(rr_quant+1)){
+        if(curr_pro->state == FINISHED)
+            break;
+    }
+
     rr_wake_up();
 }
 
@@ -167,6 +175,6 @@ void round_robin(int quantum){
                 rr_add_process(data);
         }
         if(msg_status == 1) flag = 1;
-    }while(flag != 1 || !empty_circular(circular_queue));
+    }while(!flag || !empty_circular(circular_queue));
     free(circular_queue);
 }
