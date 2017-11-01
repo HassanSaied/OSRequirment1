@@ -9,6 +9,7 @@ FILE * log_file;
 FILE * perf_file;
 double_queue * wta_queue;
 double total_wta = 0;
+int total_time = 0;
 int total_wait = 0;
 int process_counter = 0;
 void logger_init()
@@ -43,6 +44,7 @@ void logger_log(process_data *data)
             double_queue_enqueue(wta_queue,(double) TA / total);
             total_wta += (double) TA / total;
             total_wait += wait;
+            total_time += data->process.runningTime;
             process_counter += 1;
             if(!(TA % total))
                 fprintf(log_file, "At time %d process %d finished arr %d total %d remain %d wait %d TA %d WTA %d\n", clk, id, arr, total, 0, TA - total, TA, TA / total);
@@ -54,10 +56,10 @@ void logger_log(process_data *data)
             abort();
     }
 }
-void logger_print_perf_file(void)
+void logger_print_perf_file(int current_time)
 {
-    //TODO: get cpu util
-    int cpu_utilization = 100;
+    //TODO: get cpu util, this is heba's equation, if needed change it
+    double cpu_utilization = (total_time/(double)current_time) * 100.0;
     double average_wta =  total_wta / process_counter;
     double average_wait = (double) total_wait / process_counter;
     double std_wta = 0;
@@ -67,7 +69,7 @@ void logger_print_perf_file(void)
     }
     std_wta/=process_counter;;
     std_wta = sqrt(std_wta);
-    fprintf(perf_file , "CPU utilization=%d%%\n",cpu_utilization);
+    fprintf(perf_file , "CPU utilization=%.0f%%\n",cpu_utilization);
     fprintf(perf_file,"Avg WTA=%.2f\n",average_wta);
     fprintf(perf_file,"Avg Waiting=%.2f\n",average_wait);
     fprintf(perf_file,"Std WTA=%.2f\n",std_wta);

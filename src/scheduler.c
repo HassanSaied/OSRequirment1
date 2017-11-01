@@ -34,6 +34,6 @@ int main(int argc, char * argv[])
         exit(1);
     }
     printf("Scheduler: done!\n");
-    logger_print_perf_file();
+    logger_print_perf_file(getClk());
     logger_destroy();
 }
