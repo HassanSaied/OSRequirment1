@@ -35,6 +35,10 @@ int main(int argc, char * argv[])
         exit(1);
     }
     printf("Scheduler: done!\n");
+<<<<<<< HEAD
     logger_print_perf_file(atoi(argv[3]));
+=======
+    logger_print_perf_file(getClk());
+>>>>>>> 2fcc44851ecd134c571cf6836d9f7d54374da7d8
     logger_destroy();
 }

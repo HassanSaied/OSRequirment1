@@ -9,6 +9,7 @@ FILE * log_file;
 FILE * perf_file;
 double_queue * wta_queue;
 double total_wta = 0;
+int total_time = 0;
 int total_wait = 0;
 int process_counter = 0;
 
@@ -44,6 +45,7 @@ void logger_log(process_data *data)
             double_queue_enqueue(wta_queue,(double) TA / total);
             total_wta += (double) TA / total;
             total_wait += wait;
+            total_time += data->process.runningTime;
             process_counter += 1;
             if(!(TA % total))
                 fprintf(log_file, "At time %d process %d finished arr %d total %d remain %d wait %d TA %d WTA %d\n", clk, id, arr, total, 0, TA - total, TA, TA / total);
@@ -59,6 +61,7 @@ void logger_print_perf_file(int free_time)
 {
     int curr_time = getClk();
     float cpu_utilization = (curr_time-free_time)/((float)curr_time)*100;
+    // double cpu_utilization = (total_time/(double)current_time) * 100.0;
     double average_wta =  total_wta / process_counter;
     double average_wait = (double) total_wait / process_counter;
     double std_wta = 0;
