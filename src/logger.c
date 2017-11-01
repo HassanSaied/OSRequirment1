@@ -61,7 +61,7 @@ void logger_print_perf_file(int free_time)
 {
     int curr_time = getClk();
     float cpu_utilization = (curr_time-free_time)/((float)curr_time)*100;
-    // double cpu_utilization = (total_time/(double)current_time) * 100.0;
+    // double cpu_utilization = (total_time/(double)curr_time) * 100.0;
     double average_wta =  total_wta / process_counter;
     double average_wait = (double) total_wait / process_counter;
     double std_wta = 0;
