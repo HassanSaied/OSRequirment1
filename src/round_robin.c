@@ -50,7 +50,7 @@ process_data *dequeue_circular(process_data_queue *queue){
     return data;
 }
 
-void add_process(process_data *data){
+void rr_add_process(process_data *data){
     enqueue_circular(circular_queue, data);
 }
 
@@ -72,7 +72,7 @@ void rr_wake_up(int sleep_stat){
     }
 }
 
-void sigchild_handler(){
+void rr_sigchild_handler(){
     int getClk();
 
     curr_pro->state = FINISHED;
@@ -82,7 +82,7 @@ void sigchild_handler(){
     free(curr_pro);
 }
 
-void start_process(process_data *pro){
+void rr_start_process(process_data *pro){
     int getClk();
 
     pid_t child_pid = fork();
@@ -107,7 +107,7 @@ void start_process(process_data *pro){
     }
 }
 
-void resume_process(process_data *pro){
+void rr_resume_process(process_data *pro){
     int getClk();
 
     pro->state = RESUMED;
@@ -117,14 +117,14 @@ void resume_process(process_data *pro){
     rr_wake_up(sleep(rr_quant));
 }
 
-void run_round_robin(){
+void rr_run_next_process(){
     process_data *pro;
     if((pro = dequeue_circular(circular_queue)) == NULL) return;
     
     if(pro->start_time == -1)
-        start_process(pro);
+        rr_start_process(pro);
     else
-        resume_process(pro);
+        rr_resume_process(pro);
 }
 
 void round_robin(int quantum){
@@ -135,15 +135,15 @@ void round_robin(int quantum){
     process_struct pD;
     int msg_status;
     int flag = 0;
-    signal(SIGCHLD, sigchild_handler);
+    signal(SIGCHLD, rr_sigchild_handler);
 
     do{
-        run_round_robin();
+        rr_run_next_process();
 
         while((msg_status = Recmsg(&pD))  == 0){
                 process_data *data = (process_data *)malloc(sizeof(process_data));
                 data = process_data_init(&pD);
-                add_process(data);
+                rr_add_process(data);
         }
         if(msg_status == 1) flag = 1;
     }while(flag != 1 || !empty_circular(circular_queue));
