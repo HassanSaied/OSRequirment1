@@ -6,14 +6,16 @@
 #include <stdlib.h>  
 #include <stdio.h>
 #include <unistd.h>
+#include <signal.h>
 #include <string.h>
 
 #include <sys/wait.h>
 #include  <sys/types.h>
-#include <logger.h>
+
 #define min(a,b) a<b ? a:b
 
 static int rr_quant;
+static process_data *curr_pro;
 
 static struct process_data_queue_struct{
     generic_queue_head * head;
@@ -52,6 +54,33 @@ void add_process(process_data *data){
     enqueue_circular(circular_queue, data);
 }
 
+void rr_wake_up(int sleep_stat){
+    int getClk();
+
+    if(!sleep_stat){
+        kill(curr_pro->pid, SIGSTOP);
+        if((curr_pro->remaining_time -= rr_quant) != 0){
+            curr_pro->state = STOPPED;
+            logger_log(curr_pro);
+            enqueue_circular(circular_queue, curr_pro);
+        }else{
+            curr_pro->state = FINISHED;
+            curr_pro->finish_time = getClk();
+            logger_log(curr_pro);
+            free(curr_pro);
+        }
+    }
+}
+
+void sigchild_handler(){
+    int getClk();
+
+    curr_pro->state = FINISHED;
+    curr_pro->finish_time = getClk();
+    logger_log(curr_pro);
+    free(curr_pro);
+}
+
 void start_process(process_data *pro){
     int getClk();
 
@@ -71,22 +100,30 @@ void start_process(process_data *pro){
         pro->state = STARTED;
         pro->start_time = getClk(); 
         pro->pid = child_pid;
-        logger_log(pro);
-
-        sleep(rr_quant);
-
-
+        curr_pro = pro;
+        logger_log(curr_pro);
+        rr_wake_up(sleep(rr_quant));
     }
+}
+
+void resume_process(process_data *pro){
+    int getClk();
+
+    pro->state = RESUMED;
+    curr_pro = pro;
+    kill(curr_pro->pid, SIGCONT);
+    logger_log(curr_pro);   
+    rr_wake_up(sleep(rr_quant));
 }
 
 void run_round_robin(){
     process_data *pro;
     if((pro = dequeue_circular(circular_queue)) == NULL) return;
     
-    if(pro->start_time == -1){
-       start_process(pro);
-    }
-
+    if(pro->start_time == -1)
+        start_process(pro);
+    else
+        resume_process(pro);
 }
 
 void round_robin(int quantum){
@@ -97,6 +134,7 @@ void round_robin(int quantum){
     process_struct pD;
     int msg_status;
     int flag = 0;
+    signal(SIGCHLD, sigchild_handler);
 
     do{
         run_round_robin();
