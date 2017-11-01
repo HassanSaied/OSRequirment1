@@ -77,6 +77,7 @@ void sigchild_handler(){
 
     curr_pro->state = FINISHED;
     curr_pro->finish_time = getClk();
+    curr_pro->remaining_time = 0;
     logger_log(curr_pro);
     free(curr_pro);
 }
