@@ -27,7 +27,7 @@ int main()
     scanf("%s", algorithm);
     if (strcmp(algorithm, "HPF") && strcmp(algorithm, "SRTN") && strcmp(algorithm, "RR"))
     {
-        printf("Invalid input!\nUsage: process_generator {HPF, SRTN, RR quantum}");
+        printf("Invalid input!\nUsage: process_generator {HPF, SRTN, RR quantum}\n");
         exit(1);
     }
     if (!strcmp(algorithm, "RR"))

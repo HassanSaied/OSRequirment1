@@ -54,32 +54,44 @@ void rr_add_process(process_data *data){
     enqueue_circular(circular_queue, data);
 }
 
-void rr_wake_up(int sleep_stat){
+void rr_wake_up(){
     int getClk();
 
-    if(!sleep_stat){
+    if(curr_pro->state != FINISHED){
         kill(curr_pro->pid, SIGSTOP);
-        if(!(curr_pro->remaining_time -= rr_quant)){
+        if((curr_pro->remaining_time -= rr_quant)){
             curr_pro->state = STOPPED;
+            printf("@T=%d RR: stopped %d\n", getClk(), curr_pro->process.id);
             logger_log(curr_pro);
             enqueue_circular(circular_queue, curr_pro);
         }else{
             curr_pro->state = FINISHED;
+            curr_pro->remaining_time = 0;
             curr_pro->finish_time = getClk();
+            printf("@T=%d RR: finished %d\n", getClk(), curr_pro->process.id);
             logger_log(curr_pro);
             free(curr_pro);
-        }
+        } 
     }
 }
 
-void rr_sigchild_handler(){
+void rr_sigchild_handler(int signo){
     int getClk();
 
-    curr_pro->state = FINISHED;
-    curr_pro->finish_time = getClk();
-    curr_pro->remaining_time = 0;
-    logger_log(curr_pro);
-    free(curr_pro);
+    //if(signo != SIGCHLD) return;
+
+    int status;
+    pid_t pid;
+
+    if( pid = waitpid(curr_pro->pid, &status, WNOHANG)){
+        curr_pro->state = FINISHED;
+        curr_pro->finish_time = getClk();
+        curr_pro->remaining_time = 0;
+        printf("RR: signal received.\n");
+        printf("@T=%d RR: finished %d\n", getClk(), curr_pro->process.id);
+        logger_log(curr_pro);
+        free(curr_pro);
+    }
 }
 
 void rr_start_process(process_data *pro){
@@ -103,7 +115,9 @@ void rr_start_process(process_data *pro){
         pro->pid = child_pid;
         curr_pro = pro;
         logger_log(curr_pro);
-        rr_wake_up(sleep(rr_quant));
+        printf("@T=%d RR: started %d\n", getClk(), curr_pro->process.id);
+        sleep(rr_quant);
+        rr_wake_up();
     }
 }
 
@@ -113,8 +127,10 @@ void rr_resume_process(process_data *pro){
     pro->state = RESUMED;
     curr_pro = pro;
     kill(curr_pro->pid, SIGCONT);
+    printf("@T=%d RR: resumed %d\n", getClk(), curr_pro->process.id);
     logger_log(curr_pro);   
-    rr_wake_up(sleep(rr_quant));
+    sleep(rr_quant);
+    rr_wake_up();
 }
 
 void rr_run_next_process(){
@@ -128,6 +144,7 @@ void rr_run_next_process(){
 }
 
 void round_robin(int quantum){
+    int getClk();
     int Recmsg(process_struct *pData);
 
     rr_quant = quantum;
@@ -135,7 +152,10 @@ void round_robin(int quantum){
     process_struct pD;
     int msg_status;
     int flag = 0;
-    signal(SIGCHLD, rr_sigchild_handler);
+    if(signal(SIGCHLD, rr_sigchild_handler) == SIG_ERR){
+        printf("RR: can't register signal handler\n");
+        exit(1);
+    }
 
     do{
         rr_run_next_process();
@@ -143,6 +163,7 @@ void round_robin(int quantum){
         while((msg_status = Recmsg(&pD))  == 0){
                 process_data *data = (process_data *)malloc(sizeof(process_data));
                 data = process_data_init(&pD);
+                printf("@T=%d RR: received %d\n", getClk(), data->process.id);
                 rr_add_process(data);
         }
         if(msg_status == 1) flag = 1;
