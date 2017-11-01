@@ -2,16 +2,20 @@
 
 #include <clk_utilities.h>
 #include <stdio.h>
-#include <integer_queue.h>
+#include <math.h>
+#include <double_queue.h>
 
 FILE * log_file;
-integer_queue * ta_queue;
-integer_queue * wait_queue;
+FILE * perf_file;
+double_queue * wta_queue;
+double total_wta = 0;
+int total_wait = 0;
+int process_counter = 0;
 void logger_init()
 {
     log_file = fopen("scheduler.log", "w");
-    ta_queue = integer_queue_init();
-    wait_queue = integer_queue_init();
+    perf_file = fopen("scheduler.perf","w");
+    wta_queue = double_queue_init();
 }
 
 void logger_log(process_data *data)
@@ -36,8 +40,10 @@ void logger_log(process_data *data)
             break;
         case FINISHED:
             TA = data->finish_time - arr;
-            integer_queue_enqueue(ta_queue , TA);
-            integer_queue_enqueue(wait_queue , wait);
+            double_queue_enqueue(wta_queue,(double) TA / total);
+            total_wta += (double) TA / total;
+            total_wait += wait;
+            process_counter += 1;
             if(!(TA % total))
                 fprintf(log_file, "At time %d process %d finished arr %d total %d remain %d wait %d TA %d WTA %d\n", clk, id, arr, total, 0, TA - total, TA, TA / total);
             else
@@ -48,9 +54,28 @@ void logger_log(process_data *data)
             abort();
     }
 }
+void logger_print_perf_file(void)
+{
+    //TODO: get cpu util
+    int cpu_utilization = 100;
+    double average_wta =  total_wta / process_counter;
+    double average_wait = (double) total_wait / process_counter;
+    double std_wta = 0;
+    while (!double_queue_empty(wta_queue))
+    {
+        std_wta += pow((double_queue_dequeue(wta_queue)-average_wta),2.0);
+    }
+    std_wta/=process_counter;;
+    std_wta = sqrt(std_wta);
+    fprintf(perf_file , "CPU utilization=%d%%\n",cpu_utilization);
+    fprintf(perf_file,"Avg WTA=%.2f\n",average_wta);
+    fprintf(perf_file,"Avg Waiting=%.2f\n",average_wait);
+    fprintf(perf_file,"Std WTA=%.2f\n",std_wta);
+
+}
 void logger_destroy()
 {
     fclose(log_file);
-    integer_queue_destroy(ta_queue);
-    integer_queue_destroy(wait_queue);
+    fclose(perf_file);
+    double_queue_destroy(wta_queue);
 }

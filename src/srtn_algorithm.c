@@ -101,9 +101,10 @@ void sigchld_handler(int signum)
         running_process->state = FINISHED;
         printf("@T=%d SRTN: finished %d\n", getClk(), running_process->process.id);
         logger_log(running_process);
-        // save running_process somewhere or free it
+        // save running_process somewhere or free it, no need to save it, will delete it
         if (running_process->pid == pid)
         {
+            free(running_process);
             running_process = NULL;
         }
         else

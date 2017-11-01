@@ -5,6 +5,7 @@
 
 void logger_init();
 void logger_log(process_data * data);
+void logger_print_perf_file(void);
 void logger_destroy();
 
 #endif //OSREQUIRMENT_LOGGER_H
