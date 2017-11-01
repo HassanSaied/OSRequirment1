@@ -85,6 +85,7 @@ void sigusr1_handler(int signum)
         }
     } while (msg_code == 0);
     // TODO Free received_process
+    free(received_process);
     run_next_process();
 }
 

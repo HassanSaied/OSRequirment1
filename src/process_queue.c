@@ -20,4 +20,8 @@ bool empty(process_queue * queue)
 {
     return generic_queue_empty(queue->head);
 }
-
+void destroy(process_queue * queue)
+{
+    generic_queue_destroy(queue->head);
+    free(queue);
+}

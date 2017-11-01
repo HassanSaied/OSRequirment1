@@ -62,6 +62,7 @@ int main()
     // Clear all resources
     int scheduler_status;
     waitpid(scheduler_pid, &scheduler_status, 0);
+    destroy(queue);
     clear_resources(0);
 }
 

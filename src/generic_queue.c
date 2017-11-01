@@ -39,3 +39,7 @@ bool generic_queue_empty(generic_queue_head * head)
 {
     return head->first == NULL;
 }
+void generic_queue_destroy(generic_queue_head * head)
+{
+    free(head);
+}

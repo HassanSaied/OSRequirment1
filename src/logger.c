@@ -2,12 +2,16 @@
 
 #include <clk_utilities.h>
 #include <stdio.h>
+#include <integer_queue.h>
 
 FILE * log_file;
-
+integer_queue * ta_queue;
+integer_queue * wait_queue;
 void logger_init()
 {
     log_file = fopen("scheduler.log", "w");
+    ta_queue = integer_queue_init();
+    wait_queue = integer_queue_init();
 }
 
 void logger_log(process_data *data)
@@ -32,6 +36,8 @@ void logger_log(process_data *data)
             break;
         case FINISHED:
             TA = data->finish_time - arr;
+            integer_queue_enqueue(ta_queue , TA);
+            integer_queue_enqueue(wait_queue , wait);
             if(!(TA % total))
                 fprintf(log_file, "At time %d process %d finished arr %d total %d remain %d wait %d TA %d WTA %d\n", clk, id, arr, total, 0, TA - total, TA, TA / total);
             else
@@ -42,8 +48,9 @@ void logger_log(process_data *data)
             abort();
     }
 }
-
 void logger_destroy()
 {
     fclose(log_file);
+    integer_queue_destroy(ta_queue);
+    integer_queue_destroy(wait_queue);
 }

@@ -13,5 +13,5 @@ process_queue * init();
 bool enqueue(process_queue * queue, process_struct * new_node);
 process_struct * dequeue(process_queue * queue);
 bool empty(process_queue * queue);
-
+void destroy(process_queue * queue);
 #endif //OSREQUIRMENT_PROCESS_QUEUE_H

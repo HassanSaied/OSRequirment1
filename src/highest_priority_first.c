@@ -38,6 +38,7 @@ void highest_priority_first()
                    current_received_process->arrivalTime);*/
             rec_msg_code = Recmsg(current_received_process);
         }
+        free(current_received_process);
         //here rec_msg_code, can either be 1 or -1, if 1 then I have no more processes, if -1 then there is more
         last_received_process |= rec_msg_code == 1;
         rb_red_blk_node * current_node= hpf_get_next_process();
@@ -66,7 +67,6 @@ void highest_priority_first()
             current_process->remaining_time=0;
             current_process->finish_time = getClk();
             current_process->state = FINISHED;
-            int TA = current_process->start_time-current_process->process.arrivalTime;
             /*printf("At time %d process %d finished arr %d total %d remain %d wait %d TA %d WTA %.2f\n",
                    getClk(),current_process->process.id,current_process->process.arrivalTime,
                    current_process->process.runningTime,current_process->remaining_time,0,TA,
