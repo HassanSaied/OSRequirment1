@@ -16,6 +16,7 @@
 
 static int rr_quant;
 static process_data *curr_pro;
+static int hang_status = WNOHANG;
 
 static struct process_data_queue_struct{
     generic_queue_head * head;
@@ -54,31 +55,6 @@ void rr_add_process(process_data *data){
     enqueue_circular(circular_queue, data);
 }
 
-void rr_wake_up(){
-    int getClk();
-
-    printf("RR: Waking up.\n");
-    if(curr_pro->state != FINISHED){
-        kill(curr_pro->pid, SIGSTOP);
-        if((curr_pro->remaining_time -= rr_quant) > 0){
-            curr_pro->state = STOPPED;
-            printf("@T=%d RR: stopped %d\n", getClk(), curr_pro->process.id);
-            logger_log(curr_pro);
-            enqueue_circular(circular_queue, curr_pro);
-        }else if(!(curr_pro->remaining_time -= rr_quant)){
-            curr_pro->state = FINISHED;
-            curr_pro->remaining_time = 0;
-            curr_pro->finish_time = getClk();
-            printf("@T=%d RR: finished %d\n", getClk(), curr_pro->process.id);
-            logger_log(curr_pro);
-            free(curr_pro);
-        }else{
-            perror("RR: child signal termination signal sent after quantum finished\n");
-            exit(1);
-        }
-    }
-}
-
 void rr_sigchild_handler(int signo){
     int getClk();
 
@@ -86,13 +62,35 @@ void rr_sigchild_handler(int signo){
     pid_t pid;
 
     printf("RR: Signal handler provoked\n");
-    if( pid = waitpid(curr_pro->pid, &status, WNOHANG)){
+    if( pid = waitpid(curr_pro->pid, &status, hang_status)){
         curr_pro->state = FINISHED;
         curr_pro->finish_time = getClk();
         curr_pro->remaining_time = 0;
         printf("RR: Child termination signal received.\n");
         printf("@T=%d RR: finished %d\n", getClk(), curr_pro->process.id);
         logger_log(curr_pro);
+    }
+}
+
+void rr_wake_up(){
+    int getClk();
+
+    printf("RR: Waking up.\n");
+    if(curr_pro->state != FINISHED){
+        if((curr_pro->remaining_time -= rr_quant) > 0){
+            kill(curr_pro->pid, SIGSTOP);
+            curr_pro->state = STOPPED;
+            printf("@T=%d RR: stopped %d\n", getClk(), curr_pro->process.id);
+            logger_log(curr_pro);
+            enqueue_circular(circular_queue, curr_pro);
+        }else{
+            if(!(curr_pro->remaining_time)){
+                hang_status = 0;
+                rr_sigchild_handler(SIGCHLD);
+                hang_status = WNOHANG;
+            }else
+                perror("RR: child signal termination signal sent after quantum finished\n");
+        }
     }
 }
 
