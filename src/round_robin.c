@@ -60,19 +60,22 @@ void rr_wake_up(){
     printf("RR: Waking up.\n");
     if(curr_pro->state != FINISHED){
         kill(curr_pro->pid, SIGSTOP);
-        if((curr_pro->remaining_time -= rr_quant)){
+        if((curr_pro->remaining_time -= rr_quant) > 0){
             curr_pro->state = STOPPED;
             printf("@T=%d RR: stopped %d\n", getClk(), curr_pro->process.id);
             logger_log(curr_pro);
             enqueue_circular(circular_queue, curr_pro);
-        }else{
+        }else if(!(curr_pro->remaining_time -= rr_quant)){
             curr_pro->state = FINISHED;
             curr_pro->remaining_time = 0;
             curr_pro->finish_time = getClk();
             printf("@T=%d RR: finished %d\n", getClk(), curr_pro->process.id);
             logger_log(curr_pro);
             free(curr_pro);
-        } 
+        }else{
+            perror("RR: child signal termination signal sent after quantum finished\n");
+            exit(1);
+        }
     }
 }
 
@@ -87,7 +90,7 @@ void rr_sigchild_handler(int signo){
         curr_pro->state = FINISHED;
         curr_pro->finish_time = getClk();
         curr_pro->remaining_time = 0;
-        printf("RR: signal received.\n");
+        printf("RR: Child termination signal received.\n");
         printf("@T=%d RR: finished %d\n", getClk(), curr_pro->process.id);
         logger_log(curr_pro);
     }
@@ -95,7 +98,7 @@ void rr_sigchild_handler(int signo){
 
 void rr_start_process(process_data *pro){
     int getClk();
-    int unslept = 0;
+    int unslept = rr_quant;
 
     pid_t child_pid = fork();
     if(child_pid == -1)
@@ -116,28 +119,29 @@ void rr_start_process(process_data *pro){
         curr_pro = pro;
         logger_log(curr_pro);
         printf("@T=%d RR: started %d\n", getClk(), curr_pro->process.id);
-        while(unslept = sleep(rr_quant+1)){
+        while(unslept = sleep(unslept)){
             if(curr_pro->state == FINISHED)
                 break;
         }
+        printf("RR unslept: %d\n", unslept);
         rr_wake_up();
     }
 }
 
 void rr_resume_process(process_data *pro){
     int getClk();
-    int unslept = 0;
+    int unslept = rr_quant;
 
     pro->state = RESUMED;
     curr_pro = pro;
     kill(curr_pro->pid, SIGCONT);
     printf("@T=%d RR: resumed %d\n", getClk(), curr_pro->process.id);
     logger_log(curr_pro);
-    while(unslept = sleep(rr_quant+1)){
+    while(unslept = sleep(unslept)){
         if(curr_pro->state == FINISHED)
             break;
     }
-
+    printf("RR unslept: %d\n", unslept);
     rr_wake_up();
 }
 
