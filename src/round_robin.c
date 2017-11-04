@@ -67,7 +67,7 @@ pid_t set_timer(void){
     else if (!clock_pid){
         char time_string[64];
         sprintf(time_string, "%d", rr_quant);
-        if (execl(PROCESS_PROCESS_IMAGE_NAME , CLOCK_PROCESS_IMAGE_NAME, time_string, "Timer", (char *) NULL) == -1){
+        if (execl(PROCESS_PROCESS_IMAGE_NAME , PROCESS_PROCESS_IMAGE_NAME, time_string, "Timer", (char *) NULL) == -1){
             perror("Error while creating the clock");
             exit(1);
         }
