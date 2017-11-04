@@ -8,7 +8,9 @@
 #include <unistd.h>
 #include <signal.h>
 #include <string.h>
-
+#include <clk_utilities.h>
+#include <queue_utilities.h>
+#include <process_struct.h>
 #include <sys/wait.h>
 #include  <sys/types.h>
 
@@ -62,7 +64,7 @@ void rr_sigchild_handler(int signo){
     pid_t pid;
 
     printf("RR: Signal handler provoked\n");
-    if( (pid = waitpid(curr_pro->pid, &status, hang_status))==curr_pro->pid||!pid){
+    if( (pid = waitpid(curr_pro->pid, &status, hang_status))== curr_pro->pid){
         if(WIFEXITED(status))
         {
             curr_pro->state = FINISHED;
@@ -103,7 +105,6 @@ void rr_wake_up(){
 void rr_start_process(process_data *pro){
     int getClk();
     int unslept = rr_quant;
-    printf("Start_process_start_unslept %d\n",unslept);
     pid_t child_pid = fork();
     if(child_pid == -1)
         perror("Round Robin: error in forking process.\n");
@@ -123,7 +124,6 @@ void rr_start_process(process_data *pro){
         curr_pro = pro;
         logger_log(curr_pro);
         printf("@T=%d RR: started %d\n", getClk(), curr_pro->process.id);
-        printf("RR unslept before: %d\n", unslept);
         while(unslept = sleep(unslept)){
             if(curr_pro->state == FINISHED)
                 break;
@@ -162,10 +162,10 @@ void rr_run_next_process(){
 }
 
 void round_robin(int quantum){
-    int getClk();
-    int Recmsg(process_struct *pData);
+    //int getClk();
+    //int Recmsg(process_struct *pData);
 
-    sleep(0);
+    //sleep(0);
     rr_quant = quantum;
     circular_queue = init_circular_queue();
     process_struct pD;
