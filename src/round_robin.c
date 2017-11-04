@@ -82,19 +82,14 @@ void rr_wake_up(){
 
     printf("RR: Waking up.\n");
     if(curr_pro->state != FINISHED){
-        if((curr_pro->remaining_time -= rr_quant) > 0){
+        if((curr_pro->remaining_time -= rr_quant) >= 0){
             kill(curr_pro->pid, SIGSTOP);
             curr_pro->state = STOPPED;
             printf("@T=%d RR: stopped %d\n", getClk(), curr_pro->process.id);
             logger_log(curr_pro);
             enqueue_circular(circular_queue, curr_pro);
         }else{
-            if(!(curr_pro->remaining_time)){
-                hang_status = 0;
-                rr_sigchild_handler(SIGCHLD);
-                hang_status = WNOHANG;
-            }else
-                perror("RR: child signal termination signal sent after quantum finished\n");
+            perror("RR: child signal termination signal sent after quantum finished\n");
         }
     }
 }
