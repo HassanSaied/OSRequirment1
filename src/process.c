@@ -3,14 +3,17 @@
 #include <stdio.h>
 #include <clk_utilities.h>
 
-int main(int agrc, char * argv[])
+int main(int argc, char * argv[])
 {
     initClk();
-    char * end_ptr;
+    char *end_ptr;
     long int remaining_time = strtol(argv[1], &end_ptr, 10);
-    printf("I am the process, my remaining Time is %ld\n",remaining_time);
-    while (remaining_time > 0)
-    {
+    if(argc==3){
+        char *type = argv[2];
+        printf("I am the %s, my remaining Time is %ld\n",type,remaining_time);
+    }else
+        printf("I am the process, my remaining Time is %ld\n",remaining_time);
+    while (remaining_time > 0){
         remaining_time--;
         sleep(1);
     }
