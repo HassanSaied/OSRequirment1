@@ -18,7 +18,6 @@
 
 static int rr_quant;
 static process_data *curr_pro;
-static int hang_status = WNOHANG;
 static pid_t timer_pid; 
 
 static struct process_data_queue_struct{
@@ -78,8 +77,6 @@ pid_t set_timer(void){
 }
 
 void rr_wake_up(){
-    void rr_sigchild_handler(int signo);
-
     printf("RR: Waking up.\n");
     if(curr_pro->state != FINISHED){
         if((curr_pro->remaining_time -= rr_quant) >= 0){
@@ -98,7 +95,7 @@ void rr_sigchild_handler(int signo){
     int status;
     pid_t pid;
     printf("@T=%d RR: Signal handler provoked\n", getClk());
-    if((pid = waitpid(-1, &status, hang_status))==curr_pro->pid){
+    if((pid = waitpid(-1, &status, WNOHANG))==curr_pro->pid){
         printf("@T=%d RR: Signal handler provoked by process\n", getClk());
         if(WIFEXITED(status)){
             curr_pro->state = FINISHED;
