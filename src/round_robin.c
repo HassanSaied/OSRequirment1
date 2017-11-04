@@ -79,15 +79,24 @@ pid_t set_timer(void){
 void rr_wake_up(){
     printf("RR: Waking up.\n");
     if(curr_pro->state != FINISHED){
-        if((curr_pro->remaining_time -= rr_quant) >= 0){
+        if((curr_pro->remaining_time -= rr_quant) > 0){
             kill(curr_pro->pid, SIGSTOP);
             curr_pro->state = STOPPED;
             printf("@T=%d RR: stopped %d\n", getClk(), curr_pro->process.id);
             logger_log(curr_pro);
             enqueue_circular(circular_queue, curr_pro);
-        }else{
+        }else if(!curr_pro->remaining_time){
+            int status;
+            waitpid(curr_pro->pid, &status, 0);
+            curr_pro->state = FINISHED;
+            curr_pro->finish_time = getClk();
+            curr_pro->remaining_time = 0;
+            printf("@T=%d RR: Child termination signal received.\n", getClk());
+            printf("@T=%d RR: finished %d\n", getClk(), curr_pro->process.id);
+            logger_log(curr_pro);
+            free(curr_pro);
+        }else
             perror("RR: child signal termination signal sent after quantum finished\n");
-        }
     }
 }
 
@@ -106,6 +115,7 @@ void rr_sigchild_handler(int signo){
             logger_log(curr_pro);
             kill(timer_pid, SIGKILL);
             timer_pid=-1;
+            free(curr_pro);
         }else{
             puts("Child Not yet Terminated");
             pause();
