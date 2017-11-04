@@ -71,6 +71,7 @@ pid_t set_timer(void){
             perror("Error while creating the clock");
             exit(1);
         }
+        exit(1);
     }else{
         return clock_pid;
     }
@@ -99,8 +100,6 @@ void rr_wake_up(){
 }
 
 void rr_sigchild_handler(int signo){
-    int getClk();
-
     int status;
     pid_t pid;
     printf("@T=%d RR: Signal handler provoked\n", getClk());
