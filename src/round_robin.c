@@ -62,7 +62,7 @@ void rr_sigchild_handler(int signo){
     pid_t pid;
 
     printf("RR: Signal handler provoked\n");
-    if( pid = waitpid(curr_pro->pid, &status, hang_status)){
+    if((pid = waitpid(curr_pro->pid, &status, hang_status))==curr_pro->pid||!pid ){
         curr_pro->state = FINISHED;
         curr_pro->finish_time = getClk();
         curr_pro->remaining_time = 0;
@@ -117,7 +117,7 @@ void rr_start_process(process_data *pro){
         curr_pro = pro;
         logger_log(curr_pro);
         printf("@T=%d RR: started %d\n", getClk(), curr_pro->process.id);
-        while(unslept = sleep(unslept)){
+        while((unslept = sleep(unslept))>0){
             if(curr_pro->state == FINISHED)
                 break;
         }
@@ -135,7 +135,7 @@ void rr_resume_process(process_data *pro){
     kill(curr_pro->pid, SIGCONT);
     printf("@T=%d RR: resumed %d\n", getClk(), curr_pro->process.id);
     logger_log(curr_pro);
-    while(unslept = sleep(unslept)){
+    while((unslept = sleep(unslept))>0){
         if(curr_pro->state == FINISHED)
             break;
     }
@@ -157,6 +157,7 @@ void round_robin(int quantum){
     int getClk();
     int Recmsg(process_struct *pData);
 
+    sleep(0);
     rr_quant = quantum;
     circular_queue = init_circular_queue();
     process_struct pD;
