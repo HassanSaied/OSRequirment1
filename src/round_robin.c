@@ -63,12 +63,18 @@ void rr_sigchild_handler(int signo){
 
     printf("RR: Signal handler provoked\n");
     if( pid = waitpid(curr_pro->pid, &status, hang_status)){
-        curr_pro->state = FINISHED;
-        curr_pro->finish_time = getClk();
-        curr_pro->remaining_time = 0;
-        printf("RR: Child termination signal received.\n");
-        printf("@T=%d RR: finished %d\n", getClk(), curr_pro->process.id);
-        logger_log(curr_pro);
+        if(WIFEXITED(status))
+        {
+            curr_pro->state = FINISHED;
+            curr_pro->finish_time = getClk();
+            curr_pro->remaining_time = 0;
+            printf("RR: Child termination signal received.\n");
+            printf("@T=%d RR: finished %d\n", getClk(), curr_pro->process.id);
+            logger_log(curr_pro);
+        }
+        else {
+            puts("Child Not yet Terminated");
+        }
     }
 }
 
@@ -97,7 +103,7 @@ void rr_wake_up(){
 void rr_start_process(process_data *pro){
     int getClk();
     int unslept = rr_quant;
-
+    printf("Start_process_start_unslept %d\n",unslept);
     pid_t child_pid = fork();
     if(child_pid == -1)
         perror("Round Robin: error in forking process.\n");
@@ -117,6 +123,7 @@ void rr_start_process(process_data *pro){
         curr_pro = pro;
         logger_log(curr_pro);
         printf("@T=%d RR: started %d\n", getClk(), curr_pro->process.id);
+        printf("RR unslept before: %d\n", unslept);
         while(unslept = sleep(unslept)){
             if(curr_pro->state == FINISHED)
                 break;
@@ -147,8 +154,9 @@ void rr_run_next_process(){
     process_data *pro;
     if((pro = dequeue_circular(circular_queue)) == NULL) return;
     
-    if(pro->start_time == -1)
+    if(pro->start_time == -1) {
         rr_start_process(pro);
+    }
     else
         rr_resume_process(pro);
 }

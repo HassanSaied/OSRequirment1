@@ -55,7 +55,7 @@ directories:
 
 build: directories clock files_generator process_generator process scheduler 
 run : all
-		-cd build ; echo 5 | ./files_generator; echo 5; ./process_generator
+		-cd build ; echo 5 | ./files_generator; ./process_generator
 .PHONY: clean
 
 clean:
