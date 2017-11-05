@@ -113,7 +113,8 @@ void rr_sigchild_handler(int signo){
             printf("@T=%d RR: Child termination signal received.\n", getClk());
             printf("@T=%d RR: finished %d\n", getClk(), curr_pro->process.id);
             logger_log(curr_pro);
-            kill(timer_pid, SIGKILL);
+            if(timer_pid!=-1)
+            	kill(timer_pid, SIGKILL);
             timer_pid=-1;
             free(curr_pro);
         }else{
